@@ -5,18 +5,16 @@ import os
 from dotenv import load_dotenv
 from typing import Generator
 
-# Load environment variables
 load_dotenv()
 
-# 1. First declare Base (MUST come before any model imports)
 Base = declarative_base()
 
-# 2. Database configuration
+
 DATABASE_URL = "postgresql://amine:amine@localhost:5432/db"
 
 print(DATABASE_URL)
 
-# Connection pool settings
+
 engine = create_engine(
     DATABASE_URL,
     pool_size=10,
@@ -42,13 +40,10 @@ def get_db() -> Generator:
     finally:
         db.close()
 
-# 3. Import models AFTER Base is defined
-# This must be at the bottom to avoid circular imports
-from app.api.users import models  # noqa: E402
+from app.api.users import models  
 
-# Create all tables
+
 def initialize_database():
     Base.metadata.create_all(bind=engine)
 
-# Optional: Call this in main.py
 initialize_database()

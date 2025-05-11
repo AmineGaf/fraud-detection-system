@@ -9,4 +9,4 @@ class User(Base):
 
     password_hash = Column(String(128), nullable=True)
     full_name = Column(String(100), nullable=False)
-    student_id_number = Column(String(50), unique=True, nullable=True)
+    institutional_id = Column(String(50), unique=True, nullable=True)

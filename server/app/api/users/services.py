@@ -8,7 +8,7 @@ def create_user(db: Session, user: schemas.UserCreate):
         email=user.email,
         password_hash=hashed_password,
         full_name=user.full_name,
-        student_id_number=user.student_id_number
+        institutional_id=user.institutional_id
     )
     db.add(db_user)
     db.commit()
