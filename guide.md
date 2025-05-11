@@ -9,7 +9,9 @@ Fraud detection system
 ## Install Project dependencies
 
 ```
+cd client
 npm install
+
 ```
 
 
@@ -17,9 +19,26 @@ npm install
 <br>
 
 # Setup Backend Environnement
+## Prerequisites
 
 - Install Python 3.13.1
 - Install Docker
+- PostgreSQL (optional)
+
+## Create Virtual Environment
+
+```
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# OR
+.\venv\Scripts\activate
+```
+
+## Install Project Dependencies
+```
+cd server
+pip install -r requirements.txt
+```
 
 ## Setup Environnement Variables
 
@@ -34,16 +53,12 @@ DB_PASSWORD=DATABASE_PASSWORD
 DB_PORT=5432
 ```
 
-## Install Project dependencies
+
+## Database Setup 
 
 ```
-pip install requirement.tsx 
-```
-
-## Setup Database 
-
-```
-docker-compose up -d
+docker-compose up -d postgres
+python app/main.py  # This will create tables via SQLAlchemy
 ```
 
 ## Run Project 
