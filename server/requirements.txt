@@ -17,3 +17,4 @@ uvicorn==0.34.2
 email-validator
 passlib
 alembic==1.15.2
+bcrypt==4.3.0
