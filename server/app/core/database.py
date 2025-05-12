@@ -9,11 +9,7 @@ load_dotenv()
 
 Base = declarative_base()
 
-
 DATABASE_URL = "postgresql://amine:amine@localhost:5432/db"
-
-print(DATABASE_URL)
-
 
 engine = create_engine(
     DATABASE_URL,
@@ -33,17 +29,24 @@ SessionLocal = sessionmaker(
 )
 
 def get_db() -> Generator:
-    """FastAPI dependency for database sessions"""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-from app.api.users import models  
-
-
 def initialize_database():
+    """Initialize database after models are imported"""
+    from app.api.users.models import User 
+    from app.api.roles.models import Role 
     Base.metadata.create_all(bind=engine)
+    
+    # Create default roles if they don't exist
+    db = SessionLocal()
+    try:
+        from app.api.roles.services import create_default_roles
+        create_default_roles(db)
+    finally:
+        db.close()
 
 initialize_database()
