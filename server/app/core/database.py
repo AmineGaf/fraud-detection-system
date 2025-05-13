@@ -4,12 +4,13 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 from typing import Generator
+from .config import settings
 
 load_dotenv()
 
 Base = declarative_base()
 
-DATABASE_URL = "postgresql://amine:amine@localhost:5432/db"
+DATABASE_URL = settings.DATABASE_URL
 
 engine = create_engine(
     DATABASE_URL,
@@ -36,7 +37,6 @@ def get_db() -> Generator:
         db.close()
 
 def initialize_database():
-    """Initialize database after models are imported"""
     from app.api.users.models import User 
     from app.api.roles.models import Role 
     Base.metadata.create_all(bind=engine)

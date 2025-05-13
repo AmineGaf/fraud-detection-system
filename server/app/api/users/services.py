@@ -41,15 +41,28 @@ def create_user(db: Session, user: schemas.UserCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid role ID"
         )
+    
+    is_student = (role_id == 1)  # Assuming 1 is student role ID
+    hashed_password = None
+    
+    if not is_student:
+        if not user.password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password is required for non-student roles"
+            )
+        hashed_password = get_password_hash(user.password)
+    elif user.password:  # Student but provided password
+        hashed_password = get_password_hash(user.password)
 
     try:
-        hashed_password = get_password_hash(user.password) if user.password else None
         db_user = models.User(
             email=user.email,
             password_hash=hashed_password,
             full_name=user.full_name,
             institutional_id=user.institutional_id,
-            role_id=role_id
+            role_id=role_id,
+            is_active=True
         )
         db.add(db_user)
         db.commit()
