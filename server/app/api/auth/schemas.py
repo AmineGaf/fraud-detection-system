@@ -3,6 +3,8 @@ from pydantic import BaseModel, EmailStr
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_email: str
+    user_roleId: int
 
 class TokenData(BaseModel):
     email: str | None = None

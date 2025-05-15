@@ -10,9 +10,20 @@ import {
   SidebarSeparator
 } from '../sidebar/sidebar';
 import { Home, Settings, Users, FileText, LogOut, PanelLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'sonner'; 
 
 export const SidebarComponent = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('You have been logged out successfully');
+    navigate('/login');
+  };
+
   return (
     <Sidebar className="bg-sidebar border border-border shadow-sm">
       <SidebarHeader className="p-4 flex items-center justify-between">
@@ -46,14 +57,17 @@ export const SidebarComponent = () => {
           <SidebarSeparator className="bg-border" />
 
           <SidebarMenuItem>
-            <Link to="/login" className="w-full">
+            <button
+              onClick={handleLogout}
+              className="w-full"
+            >
               <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full">
                 <LogOut className="w-4 h-4 text-sidebar-foreground" />
                 <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground">
                   Logout
                 </span>
               </SidebarMenuButton>
-            </Link>
+            </button>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>

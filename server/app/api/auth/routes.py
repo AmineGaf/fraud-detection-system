@@ -29,24 +29,6 @@ def login(
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
-
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
-def signup(user: UserSignUp, db: Session = Depends(get_db)):
-    if user.role_id in [2, 3]:  # supervisor=2, admin=3
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can create admin/supervisor accounts"
-        )
-    
-    try:
-        user.password = get_password_hash(user.password)
-        return create_user(db, user)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-
+    return {"access_token": access_token, "token_type": "bearer", "user_email": user.email, "user_roleId": user.role_id}
 
 
