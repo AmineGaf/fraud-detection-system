@@ -1,8 +1,9 @@
 import { Lock, Mail } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import {  useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'sonner'; 
+import { toast } from 'sonner';
+import { ForgotPasswordDialog } from '@/components/login/ForgotPasswordDialog';
 
 type LoginFormData = {
   email: string;
@@ -34,7 +35,6 @@ export const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/20 p-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md space-y-8">
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Welcome back
@@ -44,9 +44,7 @@ export const Login = () => {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-card rounded-xl shadow-lg border border-border p-8 space-y-6">
-          {/* Email Field */}
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium text-foreground">
               Email
@@ -61,7 +59,7 @@ export const Login = () => {
                 autoComplete="email"
                 className="block w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none sm:text-sm"
                 placeholder="you@example.com"
-                {...register('email', { 
+                {...register('email', {
                   required: 'Email is required',
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -69,24 +67,18 @@ export const Login = () => {
                   }
                 })}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
-              )}
             </div>
+            {errors.email && (
+              <p className="mt-1 ml-2 text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
-          {/* Password Field */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 Password
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm font-medium text-primary hover:text-primary/80"
-              >
-                Forgot password?
-              </Link>
+              <ForgotPasswordDialog />
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -98,7 +90,7 @@ export const Login = () => {
                 autoComplete="current-password"
                 className="block w-full pl-10 pr-3 py-2 rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none sm:text-sm"
                 placeholder="••••••••"
-                {...register('password', { 
+                {...register('password', {
                   required: 'Password is required',
                   minLength: {
                     value: 6,
@@ -106,13 +98,13 @@ export const Login = () => {
                   }
                 })}
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
-              )}
+
             </div>
+            {errors.password && (
+              <p className="mt-1 ml-2 text-sm text-destructive">{errors.password.message}</p>
+            )}
           </div>
 
-          {/* Remember Me & Submit */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input

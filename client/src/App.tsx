@@ -9,10 +9,11 @@ import { AuthProvider } from './context/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { PasswordResetPage } from './pages/PasswordResetPage';
 
 function AppLayout() {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/reset-password';
 
   return (
     <div className="flex min-w-full bg-background">
@@ -25,6 +26,7 @@ function AppLayout() {
           <div className={isLoginPage ? "w-full" : "max-w-4xl mx-auto"}>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<PasswordResetPage />} />
               <Route element={<PrivateRoute />}>
                 <Route path="/exams" element={<Exams />} />
                 <Route path="/users" element={<Users />} />

@@ -18,3 +18,10 @@ class UserSignUp(BaseModel):
     password: str
     full_name: str
     role_id: int | None = None 
+    
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
