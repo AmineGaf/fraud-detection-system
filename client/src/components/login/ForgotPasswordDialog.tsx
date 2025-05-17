@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter
-} from './dialog';
+} from '../ui/dialog';
 
 type ForgotPasswordFormData = {
   email: string;

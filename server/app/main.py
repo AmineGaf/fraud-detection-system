@@ -25,10 +25,14 @@ Base.metadata.create_all(bind=engine)
 from app.api.users import routes as user_routes
 from app.api.roles import routes as role_routes
 from app.api.auth import routes as auth_routes
+from app.api.classes import routes as class_routes
+from app.api.exams import routes as exams_routes
 
 app.include_router(user_routes.router)
 app.include_router(role_routes.router)
 app.include_router(auth_routes.router)
+app.include_router(class_routes.router)
+app.include_router(exams_routes.router)
 
 @app.get("/")
 def health_check():

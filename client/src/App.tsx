@@ -10,6 +10,7 @@ import { PrivateRoute } from './components/PrivateRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { PasswordResetPage } from './pages/PasswordResetPage';
+import { Classes } from './pages/Classes';
 
 function AppLayout() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function AppLayout() {
               <Route element={<PrivateRoute />}>
                 <Route path="/exams" element={<Exams />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/classes" element={<Classes />} />
                 <Route path="/" element={
                   <>
                     <h2 className="text-2xl font-bold mb-4 text-foreground">Welcome</h2>

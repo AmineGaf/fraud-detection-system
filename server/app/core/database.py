@@ -37,8 +37,12 @@ def get_db() -> Generator:
         db.close()
 
 def initialize_database():
-    from app.api.users.models import User 
-    from app.api.roles.models import Role 
+    # Import all models here to ensure they're registered with SQLAlchemy
+    from app.api.users.models import User, PasswordResetToken
+    from app.api.roles.models import Role
+    from app.api.classes.models import Class, UserClassAssociation
+    from app.api.exams.models import Exam
+    
     Base.metadata.create_all(bind=engine)
     
     # Create default roles if they don't exist

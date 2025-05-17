@@ -20,7 +20,6 @@ class PasswordResetToken(Base):
         Index('ix_password_reset_token_expires', 'expires_at'),
         Index('ix_password_reset_token_user', 'user_id'),
     )
-    
 
 class User(Base):
     __tablename__ = "users"
@@ -40,3 +39,11 @@ class User(Base):
         cascade="all, delete-orphan",
         lazy="dynamic"
     )
+    
+    classes = relationship(
+        "UserClassAssociation",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic"
+    )
+    
