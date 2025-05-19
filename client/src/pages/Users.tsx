@@ -1,72 +1,117 @@
-import { useState } from "react"
-import { Plus, Search, Filter, MoreHorizontal } from "lucide-react"
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableHead, 
-  TableRow, 
+import { useState, useEffect } from "react";
+import { Plus, Search, Filter, MoreHorizontal } from "lucide-react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
   TableCell,
   TableCaption
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-// import { AddUserForm } from "./components/AddUserForm"
+} from "@/components/ui/dialog";
 
-// Mock user data - replace with real API calls
-const mockUsers = [
-  { id: 1, name: "Alex Johnson", email: "alex@example.com", role: "Admin", status: "Active", lastLogin: "2023-06-15" },
-  { id: 2, name: "Maria Garcia", email: "maria@example.com", role: "Teacher", status: "Active", lastLogin: "2023-06-14" },
-  { id: 3, name: "James Smith", email: "james@example.com", role: "Student", status: "Inactive", lastLogin: "2023-05-20" },
-  { id: 4, name: "Sarah Williams", email: "sarah@example.com", role: "Teacher", status: "Active", lastLogin: "2023-06-10" },
-  { id: 5, name: "David Brown", email: "david@example.com", role: "Student", status: "Pending", lastLogin: "2023-06-01" },
-  { id: 6, name: "David Brown", email: "david@example.com", role: "Student", status: "Pending", lastLogin: "2023-06-01" },
-  { id: 7, name: "David Brown", email: "david@example.com", role: "Student", status: "Pending", lastLogin: "2023-06-01" },
-  { id: 8, name: "David Brown", email: "david@example.com", role: "Student", status: "Pending", lastLogin: "2023-06-01" },
-  { id: 9, name: "David Brown", email: "david@example.com", role: "Student", status: "Pending", lastLogin: "2023-06-01" },
-]
+type User = {
+  id: number;
+  full_name: string;
+  email: string;
+  institutional_id?: string;
+  role: {
+    name: string;
+    id: number
+  };
+};
+
+type AddUser = {
+  id: number;
+  full_name: string;
+  email: string;
+  institutional_id?: string;
+  role_id: number;
+}
 
 export const Users = () => {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [users, setUsers] = useState(mockUsers)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [users, setUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/users");
+        const data = await res.json();
+        const usersWithDefaults = data.map((user: User) => ({
+          ...user,
+        }));
+        setUsers(usersWithDefaults);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+    user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const handleAddUser = (newUser: typeof mockUsers[0]) => {
-    setUsers([...users, { ...newUser, id: users.length + 1 }])
-    setIsDialogOpen(false)
-  }
+  const handleAddUser = async (newUser: Omit<AddUser, "id"> & { password?: string }) => {
+    try {
+      const response = await fetch("http://localhost:8000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser)
+      });
+      const createdUser = await response.json();
+      setUsers([...users, {
+        ...createdUser,
+        last_login: new Date().toISOString().split('T')[0]
+      }]);
+      setIsDialogOpen(false);
+      return true;
+    } catch (error) {
+      console.error("Failed to add user:", error);
+      return false;
+    }
+  };
 
-  const handleDeleteUser = (userId: number) => {
-    setUsers(users.filter(user => user.id !== userId))
-  }
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      await fetch(`http://localhost:8000/users/${userId}`, { method: "DELETE" });
+      setUsers(users.filter(user => user.id !== userId));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  if (loading) return <div className="p-4">Loading users...</div>;
 
   return (
-    <div className="space-y-6">
-      {/* Header with title and actions */}
+    <div className="space-y-6 p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
           <p className="text-muted-foreground">Manage all system users and their permissions</p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -78,7 +123,7 @@ export const Users = () => {
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
             </DialogHeader>
-            {/* <AddUserForm onSubmit={handleAddUser} /> */}
+            <AddUserForm onSubmit={handleAddUser} onSuccess={() => setIsDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -108,8 +153,7 @@ export const Users = () => {
               <TableHead className="w-[200px]">Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Last Login</TableHead>
+              <TableHead>institutional_id</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -117,31 +161,19 @@ export const Users = () => {
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell className="font-medium">{user.full_name}</TableCell>
+                  <TableCell>{user.email || "-"}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      user.role === "Admin" 
-                        ? "bg-blue-100 text-blue-800" 
-                        : user.role === "Teacher" 
-                          ? "bg-purple-100 text-purple-800" 
-                          : "bg-green-100 text-green-800"
-                    }`}>
-                      {user.role}
+                    <span className={`px-2 py-1 rounded-full text-xs ${user.role.name === "Admin"
+                      ? "bg-blue-100 text-blue-800"
+                      : user.role.name === "Teacher"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-green-100 text-green-800"
+                      }`}>
+                      {user.role.name}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      user.status === "Active" 
-                        ? "bg-green-100 text-green-800" 
-                        : user.status === "Pending" 
-                          ? "bg-yellow-100 text-yellow-800" 
-                          : "bg-red-100 text-red-800"
-                    }`}>
-                      {user.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{user.lastLogin}</TableCell>
+                  <TableCell>{user.institutional_id}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -176,7 +208,6 @@ export const Users = () => {
         </Table>
       </div>
 
-      {/* Pagination would go here */}
       <div className="flex items-center justify-end space-x-2">
         <Button variant="outline" size="sm" disabled>
           Previous
@@ -186,75 +217,105 @@ export const Users = () => {
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-// Add this component in a separate file (components/AddUserForm.tsx)
-const AddUserForm = ({ onSubmit }: { onSubmit: (user: any) => void }) => {
-  const [formData, setFormData] = useState({
-    name: "",
+const AddUserForm = ({
+  onSubmit,
+  onSuccess
+}: {
+  onSubmit: (user: Omit<AddUser, "id"> & { password?: string }) => Promise<boolean>;
+  onSuccess: () => void;
+}) => {
+  const [form, setForm] = useState<Omit<AddUser, "id"> & { password?: string }>({
+    full_name: "",
     email: "",
-    role: "Student",
-    status: "Active"
-  })
+    institutional_id: "",
+    role_id: 1,
+    password: ""
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await onSubmit(form);
+    if (success) {
+      setForm({
+        full_name: "",
+        email: "",
+        institutional_id: "",
+        role_id: 1,
+        password: ""
+      });
+      onSuccess();
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
       <div className="space-y-2">
         <label className="block text-sm font-medium">Full Name</label>
-        <Input 
-          value={formData.name}
-          onChange={(e) => setFormData({...formData, name: e.target.value})}
+        <Input
+          value={form.full_name}
+          onChange={(e) => setForm({ ...form, full_name: e.target.value })}
           placeholder="Enter full name"
           required
         />
       </div>
-      
+
       <div className="space-y-2">
         <label className="block text-sm font-medium">Email</label>
-        <Input 
+        <Input
           type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({...formData, email: e.target.value})}
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
           placeholder="Enter email address"
           required
         />
       </div>
-      
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Institutional ID</label>
+        <Input
+          value={form.institutional_id}
+          onChange={(e) => setForm({ ...form, institutional_id: e.target.value })}
+          placeholder="Enter institutional ID"
+        />
+      </div>
+
       <div className="space-y-2">
         <label className="block text-sm font-medium">Role</label>
         <select
-          value={formData.role}
-          onChange={(e) => setFormData({...formData, role: e.target.value})}
+          value={form.role_id}
+          onChange={(e) => {
+            setForm({
+              ...form,
+              role_id: parseInt(e.target.value),
+            });
+          }}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
-          <option value="Student">Student</option>
-          <option value="Teacher">Teacher</option>
-          <option value="Admin">Admin</option>
+          <option value="1">Student</option>
+          <option value="2">Teacher</option>
+          <option value="3">Admin</option>
         </select>
       </div>
-      
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">Status</label>
-        <select
-          value={formData.status}
-          onChange={(e) => setFormData({...formData, status: e.target.value})}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        >
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-          <option value="Pending">Pending</option>
-        </select>
-      </div>
-      
+
+
+      {form.role_id !== 1 && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Password</label>
+          <Input
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            placeholder="Enter password"
+          />
+        </div>
+      )}
+
       <div className="flex justify-end gap-2 pt-2">
         <Button type="submit">Add User</Button>
       </div>
     </form>
-  )
-}
+  );
+};

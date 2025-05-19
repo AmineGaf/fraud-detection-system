@@ -29,7 +29,6 @@ class User(Base):
     password_hash = Column(String(128), nullable=True)
     full_name = Column(String(100), nullable=False)
     institutional_id = Column(String(50), unique=True, nullable=True)
-    is_active = Column(Boolean, default=True)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     
     role = relationship("Role", back_populates="users")

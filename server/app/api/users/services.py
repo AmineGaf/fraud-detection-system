@@ -14,7 +14,6 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    # Check if email exists
     if user.email:
         existing_email = get_user_by_email(db, user.email)
         if existing_email:
@@ -42,7 +41,7 @@ def create_user(db: Session, user: schemas.UserCreate):
             detail="Invalid role ID"
         )
     
-    is_student = (role_id == 1)  # Assuming 1 is student role ID
+    is_student = (role_id == 1)
     hashed_password = None
     
     if not is_student:
@@ -52,7 +51,7 @@ def create_user(db: Session, user: schemas.UserCreate):
                 detail="Password is required for non-student roles"
             )
         hashed_password = get_password_hash(user.password)
-    elif user.password:  # Student but provided password
+    elif user.password: 
         hashed_password = get_password_hash(user.password)
 
     try:
@@ -62,7 +61,6 @@ def create_user(db: Session, user: schemas.UserCreate):
             full_name=user.full_name,
             institutional_id=user.institutional_id,
             role_id=role_id,
-            is_active=True
         )
         db.add(db_user)
         db.commit()
@@ -82,14 +80,12 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
         
     update_data = user_update.dict(exclude_unset=True)
     
-    # Handle password update
     if "password" in update_data:
         if update_data["password"]:
             update_data["password_hash"] = get_password_hash(update_data.pop("password"))
         else:
             update_data.pop("password")
     
-    # Handle role update
     if "role_id" in update_data:
         if not role_services.get_role(db, update_data["role_id"]):
             raise HTTPException(
@@ -97,7 +93,6 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
                 detail="Invalid role ID"
             )
     
-    # Update fields
     for field, value in update_data.items():
         setattr(db_user, field, value)
     

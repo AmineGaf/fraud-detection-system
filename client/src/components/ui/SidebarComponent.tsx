@@ -9,7 +9,7 @@ import {
     SidebarTrigger,
     SidebarSeparator
 } from '../sidebar/sidebar';
-import { Home, Settings, Users, FileText, LogOut, PanelLeft, BookOpen } from 'lucide-react'; // Added BookOpen icon for Classes
+import { Home, Settings, Users, FileText, LogOut, PanelLeft, BookOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner'; 
@@ -26,7 +26,7 @@ export const SidebarComponent = () => {
 
     return (
         <Sidebar className="bg-sidebar border border-border shadow-sm">
-            <SidebarHeader className="p-4 flex items-center justify-between">
+            <SidebarHeader className="p-4 flex flex-row items-center justify-between">
                 <Link to="/" className="text-lg font-semibold text-sidebar-foreground group-data-[state=collapsed]/sidebar:hidden">
                     My App
                 </Link>
@@ -39,7 +39,7 @@ export const SidebarComponent = () => {
                 <SidebarMenu>
                     {[
                         { icon: Home, label: "Dashboard", path: "/" },
-                        { icon: BookOpen, label: "Classes", path: "/classes" }, // Added Classes menu item
+                        { icon: BookOpen, label: "Classes", path: "/classes" },
                         { icon: Users, label: "Users", path: "/users" },
                         { icon: FileText, label: "Exams", path: "/exams" },
                     ].map((item, index) => (
@@ -58,9 +58,10 @@ export const SidebarComponent = () => {
                     <SidebarSeparator className="bg-border" />
 
                     <SidebarMenuItem>
-                        <button
+                        {/* Changed from button to div with onClick handler */}
+                        <div 
                             onClick={handleLogout}
-                            className="w-full"
+                            className="w-full cursor-pointer"
                         >
                             <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full">
                                 <LogOut className="w-4 h-4 text-sidebar-foreground" />
@@ -68,7 +69,7 @@ export const SidebarComponent = () => {
                                     Logout
                                 </span>
                             </SidebarMenuButton>
-                        </button>
+                        </div>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
