@@ -72,3 +72,16 @@ export const bulkAssignClass = async ({
   );
   return response.data;
 };
+
+export const removeUserFromClass = async ({
+  userId,
+  classId
+}: {
+  userId: number;
+  classId: number;
+}): Promise<{ success: boolean }> => {
+  const response = await axios.delete(
+    `${API_BASE_URL}/users/${userId}/remove-class/${classId}`
+  );
+  return response.data;
+};

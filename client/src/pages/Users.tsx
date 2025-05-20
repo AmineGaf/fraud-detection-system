@@ -14,7 +14,8 @@ import {
   useDeleteUser,
   useClassesData,
   useAssignClass,
-  useBulkAssignClass
+  useBulkAssignClass,
+  useRemoveFromClass
 } from "@/hooks/useUsers";
 import { AddUserForm } from "@/components/users/AddUserForm";
 import { UserTable } from "@/components/users/UserTable";
@@ -26,6 +27,7 @@ export const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [filters, setFilters] = useState<{ role?: string; class?: string }>({});
 
   // Fetch data with improved loading states
   const { data: users = [], isLoading: isUsersLoading } = useUsersData();
@@ -35,11 +37,21 @@ export const Users = () => {
   const assignClassMutation = useAssignClass();
   const bulkAssignMutation = useBulkAssignClass();
 
-  const filteredUsers = users.filter(
-    (user: User) =>
+  const filteredUsers = users.filter((user: User) => {
+    // Search term filtering
+    const matchesSearch =
       user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Role filtering
+    const matchesRole = !filters.role || user.role.name === filters.role;
+
+    // Class filtering
+    const matchesClass = !filters.class ||
+      user.classes.some(c => String(c.id) === filters.class);
+
+    return matchesSearch && matchesRole && matchesClass;
+  });
 
   const handleAddUser = async (newUser: Omit<AddUser, "id"> & { password?: string }) => {
     try {
@@ -72,6 +84,16 @@ export const Users = () => {
     }
   };
 
+  const removeFromClassMutation = useRemoveFromClass();
+
+  const handleRemoveFromClass = async (userId: number, classId: number) => {
+    try {
+      await removeFromClassMutation.mutateAsync({ userId, classId });
+    } catch (error) {
+      console.error("Remove from class error:", error);
+    }
+  };
+
   // Combine loading states
   const isLoading = isUsersLoading || isClassesLoading;
 
@@ -83,7 +105,7 @@ export const Users = () => {
   );
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-4  ">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
@@ -114,6 +136,9 @@ export const Users = () => {
       <SearchBar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        onFilterChange={setFilters}
+        currentFilters={filters}
+        classes={classes}
       />
 
       <UserTable
@@ -122,9 +147,11 @@ export const Users = () => {
         selectedUsers={selectedUsers}
         onSelectUsers={setSelectedUsers}
         onAssign={handleAssignClass}
+        onRemove={handleRemoveFromClass}
         onDelete={deleteUserMutation.mutate}
         isDeleting={deleteUserMutation.isPending}
         isAssigning={assignClassMutation.isPending}
+        isRemoving={removeFromClassMutation.isPending}
       />
 
       {selectedUsers.length > 0 && (

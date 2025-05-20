@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchUsers, createUser, deleteUser, bulkAssignClass, assignClassToUser, fetchClasses } from "@/api/users";
+import { fetchUsers, createUser, deleteUser, bulkAssignClass, assignClassToUser, fetchClasses, removeUserFromClass } from "@/api/users";
 import { toast } from "sonner";
 import { useState } from "react";
 import type { AddUser, Class } from "@/types/users";
@@ -150,6 +150,28 @@ export const useBulkAssignClass = () => {
         toast.error("Cannot assign students to multiple classes");
       } else {
         toast.error("Bulk assignment failed: " + error.message);
+      }
+    }
+  });
+};
+
+export const useRemoveFromClass = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: removeUserFromClass,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
+      toast.success("User removed from class successfully");
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("User not found")) {
+        toast.error("User not found");
+      } else if (error.message.includes("Class not found")) {
+        toast.error("Class not found");
+      } else {
+        toast.error("Failed to remove user from class: " + error.message);
       }
     }
   });

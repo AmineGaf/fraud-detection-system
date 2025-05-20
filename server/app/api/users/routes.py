@@ -4,6 +4,8 @@ from typing import List
 from ..classes.services import ClassService
 from . import schemas, services  
 from app.core.database import get_db   
+from ..classes import models
+
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -141,6 +143,49 @@ def bulk_assign_users(
             "message": f"Assigned {count} users, skipped {skipped}"
         }
     except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+        
+# In your users/router.py
+@router.delete("/{user_id}/remove-class/{class_id}", response_model=schemas.GenericResponse)
+def remove_user_from_class(
+    user_id: int,
+    class_id: int,
+    db: Session = Depends(get_db)
+):
+    try:
+        # Verify user exists
+        user = services.get_user(db, user_id=user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Verify class exists
+        class_ = db.query(models.Class).filter(models.Class.id == class_id).first()
+        if not class_:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Class not found"
+            )
+        
+        # Remove the association
+        db.query(models.UserClassAssociation).filter(
+            models.UserClassAssociation.user_id == user_id,
+            models.UserClassAssociation.class_id == class_id
+        ).delete()
+        
+        db.commit()
+        
+        return {
+            "success": True,
+            "message": f"User {user_id} removed from class {class_id}"
+        }
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)

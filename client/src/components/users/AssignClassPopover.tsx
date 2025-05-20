@@ -50,10 +50,7 @@ export function AssignClassPopover({
         >
           {currentClass ? (
             <>
-              <span>{currentClass.name}</span>
-              <span className="text-muted-foreground text-xs">
-                ({currentClass.studying_program})
-              </span>
+              <PlusCircle className="h-4 w-4" />
             </>
           ) : (
             <>

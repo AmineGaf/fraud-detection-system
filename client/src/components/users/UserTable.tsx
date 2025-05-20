@@ -12,9 +12,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, X, Loader2 } from "lucide-react";
 import type { Class, User } from "@/types/users";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "../ui/checkbox";
@@ -26,9 +29,11 @@ interface UserTableProps {
   selectedUsers: number[];
   onSelectUsers: (ids: number[]) => void;
   onAssign: (userId: number, classId: number) => void;
+  onRemove: (userId: number, classId: number) => void;
   onDelete: (userId: number) => void;
   isDeleting: boolean;
   isAssigning: boolean;
+  isRemoving?: boolean;
 }
 
 export const UserTable = ({
@@ -37,9 +42,11 @@ export const UserTable = ({
   selectedUsers,
   onSelectUsers,
   onAssign,
+  onRemove,
   onDelete,
   isDeleting,
   isAssigning,
+  isRemoving = false,
 }: UserTableProps) => {
   return (
     <div className="rounded-lg border overflow-hidden">
@@ -57,7 +64,7 @@ export const UserTable = ({
             <TableHead className="w-[200px]">Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Classes</TableHead>
+            <TableHead className="w-[400px]">Classes</TableHead>
             <TableHead>institutional_id</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -100,17 +107,56 @@ export const UserTable = ({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <div className="flex flex-wrap gap-1">
-                      {user.classes?.map((classItem) => (
+                      {user.classes?.slice(0, 2).map((classItem) => ( // Only show first 2 classes
                         <Badge
                           key={classItem.id}
                           variant="outline"
-                          className="bg-gray-100"
+                          className="bg-gray-100 flex items-center gap-1"
                         >
                           {classItem.name}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemove(user.id, classItem.id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                            disabled={isRemoving}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </Badge>
                       ))}
+                      {user.classes?.length > 2 && ( // Show "+X more" if there are additional classes
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Badge variant="outline" className="bg-gray-100 cursor-pointer">
+                              +{user.classes.length - 2} more
+                            </Badge>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {user.classes?.slice(2).map((classItem) => ( // Show remaining classes in dropdown
+                              <DropdownMenuItem
+                                key={classItem.id}
+                                className="flex items-center justify-between"
+                              >
+                                <span>{classItem.name}</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemove(user.id, classItem.id);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 ml-2"
+                                  disabled={isRemoving}
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                     <AssignClassPopover
                       userId={user.id}
@@ -131,12 +177,36 @@ export const UserTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
+                      {user.classes.length > 0 && (
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            Remove from Class
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            {user.classes.map((classItem) => (
+                              <DropdownMenuItem
+                                key={classItem.id}
+                                onClick={() => onRemove(user.id, classItem.id)}
+                                disabled={isRemoving}
+                              >
+                                {isRemoving ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : null}
+                                {classItem.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      )}
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => onDelete(user.id)}
                         disabled={isDeleting}
                       >
-                        {isDeleting ? "Deleting..." : "Delete"}
+                        {isDeleting ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : null}
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
