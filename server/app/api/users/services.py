@@ -11,17 +11,18 @@ def get_user(db: Session, user_id: int):
         joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
     ).filter(models.User.id == user_id).first()
 
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.User).options(
+        joinedload(models.User.role),
+        joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
+    ).offset(skip).limit(limit).all()
+
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).options(
         joinedload(models.User.role),
         joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
     ).filter(models.User.email == email).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).options(
-        joinedload(models.User.role),
-        joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
-    ).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: schemas.UserCreate):
     if user.email:
@@ -133,3 +134,4 @@ def delete_user(db: Session, user_id: int):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database error: {str(e)}"
         )
+        
