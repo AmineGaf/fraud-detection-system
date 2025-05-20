@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, Text
+from sqlalchemy import Column, Index, Integer, String, ForeignKey, Boolean, DateTime, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -15,7 +15,11 @@ class Class(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    users = relationship("UserClassAssociation", back_populates="class_")
+    users = relationship(
+        "UserClassAssociation",
+        back_populates="class_",
+        cascade="all, delete-orphan"
+    )
     exams = relationship("Exam", back_populates="class_", cascade="all, delete-orphan")
 
 class UserClassAssociation(Base):
@@ -27,5 +31,10 @@ class UserClassAssociation(Base):
     is_professor = Column(Boolean, default=False)
     joined_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    user = relationship("User", viewonly=True)
+    # Bidirectional relationships
+    user = relationship("User", back_populates="classes")
     class_ = relationship("Class", back_populates="users")
+    
+    __table_args__ = (
+        Index('ix_user_class_unique', 'user_id', 'class_id', unique=True),
+    )

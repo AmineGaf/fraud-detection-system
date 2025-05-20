@@ -36,13 +36,25 @@ class User(Base):
         "PasswordResetToken", 
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="dynamic"
+        lazy="dynamic"  # Keep dynamic for tokens if needed
     )
     
     classes = relationship(
         "UserClassAssociation",
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="dynamic"
+        # Remove lazy="dynamic" to allow eager loading
     )
+    
+    # Add this property to get class information based on role
+    @property
+    def class_info(self):
+        if self.role_id == 1:  # Student - single class
+            association = self.classes.first()
+            if association:
+                return [association.class_]
+            return []
+        elif self.role_id == 2:  # Supervisor - multiple classes
+            return [assoc.class_ for assoc in self.classes.all()]
+        return []
     

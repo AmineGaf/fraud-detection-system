@@ -1,5 +1,5 @@
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, TYPE_CHECKING
 from ..roles.schemas import RoleResponse
 
 class UserBase(BaseModel):
@@ -18,7 +18,13 @@ class UserUpdate(BaseModel):
     institutional_id: str | None = None
     role_id: int | None = None
 
+# Add this class for class information
+class UserClassInfo(BaseModel):
+    name: str
+    model_config = ConfigDict(from_attributes=True)
+
 class UserResponse(UserBase):
     id: int
     role: RoleResponse
+    classes: Optional[List[UserClassInfo]] = None
     model_config = ConfigDict(from_attributes=True)

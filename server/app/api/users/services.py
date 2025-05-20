@@ -1,17 +1,27 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from . import models, schemas
+from ..classes.models import UserClassAssociation 
 from ..roles import models as role_models, services as role_services
 from ...core.security import get_password_hash
 from fastapi import HTTPException, status
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    return db.query(models.User).options(
+        joinedload(models.User.role),
+        joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
+    ).filter(models.User.id == user_id).first()
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+    return db.query(models.User).options(
+        joinedload(models.User.role),
+        joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
+    ).filter(models.User.email == email).first()
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+    return db.query(models.User).options(
+        joinedload(models.User.role),
+        joinedload(models.User.classes).joinedload(UserClassAssociation.class_)
+    ).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: schemas.UserCreate):
     if user.email:
@@ -22,7 +32,6 @@ def create_user(db: Session, user: schemas.UserCreate):
                 detail="Email already registered"
             )
 
-    # Check if institutional_id exists
     if user.institutional_id:
         existing_id = db.query(models.User).filter(
             models.User.institutional_id == user.institutional_id
@@ -41,7 +50,7 @@ def create_user(db: Session, user: schemas.UserCreate):
             detail="Invalid role ID"
         )
     
-    is_student = (role_id == 1)
+    is_student = (role_id == 1) 
     hashed_password = None
     
     if not is_student:
@@ -65,7 +74,8 @@ def create_user(db: Session, user: schemas.UserCreate):
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
-        return db_user
+        # Reload with relationships to return complete data
+        return get_user(db, db_user.id)
     except Exception as e:
         db.rollback()
         raise HTTPException(
@@ -78,7 +88,8 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     if not db_user:
         return None
         
-    update_data = user_update.dict(exclude_unset=True)
+    # Replace .dict() with .model_dump()
+    update_data = user_update.model_dump(exclude_unset=True)
     
     if "password" in update_data:
         if update_data["password"]:
@@ -99,14 +110,14 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     try:
         db.commit()
         db.refresh(db_user)
-        return db_user
+        # Reload with relationships to return complete data
+        return get_user(db, user_id)
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database error: {str(e)}"
         )
-
 def delete_user(db: Session, user_id: int):
     db_user = get_user(db, user_id)
     if not db_user:
