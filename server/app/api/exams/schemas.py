@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 from enum import Enum
+from .models import Exam
 
 class ExamStatus(str, Enum):
     UPCOMING = "upcoming"
@@ -22,9 +23,25 @@ class ExamUpdate(BaseModel):
     exam_date: Optional[datetime] = None
     status: Optional[ExamStatus] = None
     fraud_status: Optional[str] = None
+    
+
+class ClassInfo(BaseModel):
+    name: str
+    studying_program: str
 
 class ExamResponse(ExamBase):
     id: int
     fraud_status: Optional[str] = None
     created_at: datetime
+    class_info: ClassInfo
+    
+    @classmethod
+    def from_orm(cls, db_exam: Exam):
+        exam_data = db_exam.__dict__
+        exam_data["class_info"] = {
+            "name": db_exam.class_.name,
+            "studying_program": db_exam.class_.studying_program
+        }
+        return cls(**exam_data)
+    
     model_config = ConfigDict(from_attributes=True)
