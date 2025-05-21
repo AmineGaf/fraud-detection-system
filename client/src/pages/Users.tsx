@@ -15,7 +15,8 @@ import {
   useClassesData,
   useAssignClass,
   useBulkAssignClass,
-  useRemoveFromClass
+  useRemoveFromClass,
+  useUpdateUser
 } from "@/hooks/useUsers";
 import { AddUserForm } from "@/components/users/AddUserForm";
 import { UserTable } from "@/components/users/UserTable";
@@ -28,14 +29,17 @@ export const Users = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [filters, setFilters] = useState<{ role?: string; class?: string }>({});
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [tableKey, setTableKey] = useState(0);
 
-  // Fetch data with improved loading states
   const { data: users = [], isLoading: isUsersLoading } = useUsersData();
   const { data: classes = [], isLoading: isClassesLoading } = useClassesData();
   const createUserMutation = useCreateUser();
   const deleteUserMutation = useDeleteUser();
   const assignClassMutation = useAssignClass();
   const bulkAssignMutation = useBulkAssignClass();
+  const updateUserMutation = useUpdateUser();
+
 
   const filteredUsers = users.filter((user: User) => {
     // Search term filtering
@@ -48,19 +52,10 @@ export const Users = () => {
 
     // Class filtering
     const matchesClass = !filters.class ||
-      user.classes.some(c => String(c.id) === filters.class);
+      user.classes?.some(c => String(c.id) === filters.class);
 
     return matchesSearch && matchesRole && matchesClass;
   });
-
-  const handleAddUser = async (newUser: Omit<AddUser, "id"> & { password?: string }) => {
-    try {
-      await createUserMutation.mutateAsync(newUser);
-      setIsDialogOpen(false);
-    } catch (error) {
-      throw error;
-    }
-  };
 
   const handleAssignClass = async (userId: number, classId: number) => {
     try {
@@ -84,6 +79,28 @@ export const Users = () => {
     }
   };
 
+  const handleEditUser = (userId: number) => {
+    setEditingUserId(userId);
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = async (formData: Omit<AddUser, "id"> & { password?: string }) => {
+    try {
+      if (editingUserId) {
+        await updateUserMutation.mutateAsync({
+          userId: editingUserId,
+          userData: formData
+        });
+      } else {
+        await createUserMutation.mutateAsync(formData);
+      }
+      setIsDialogOpen(false);
+      setEditingUserId(null);
+    } catch (error) {
+      throw error
+    }
+  };
+
   const removeFromClassMutation = useRemoveFromClass();
 
   const handleRemoveFromClass = async (userId: number, classId: number) => {
@@ -94,7 +111,6 @@ export const Users = () => {
     }
   };
 
-  // Combine loading states
   const isLoading = isUsersLoading || isClassesLoading;
 
   if (isLoading) return (
@@ -112,7 +128,13 @@ export const Users = () => {
           <p className="text-muted-foreground">Manage all system users and their permissions</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setEditingUserId(null);
+            setTableKey(prev => prev + 1); // Force table remount
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
@@ -121,16 +143,25 @@ export const Users = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
+              <DialogTitle>
+                {editingUserId ? "Edit User" : "Add New User"}
+              </DialogTitle>
             </DialogHeader>
             <AddUserForm
-              onSubmit={handleAddUser}
-              onSuccess={() => setIsDialogOpen(false)}
-              isLoading={createUserMutation.isPending}
-              error={createUserMutation.error}
+              onSubmit={handleSubmit}
+              onSuccess={() => {
+                setIsDialogOpen(false);
+                setEditingUserId(null);
+              }}
+              isLoading={editingUserId ? updateUserMutation.isPending : createUserMutation.isPending}
+              error={editingUserId ? updateUserMutation.error : createUserMutation.error}
+              userId={editingUserId}
+              isEditMode={!!editingUserId}
+              initialData={editingUserId ? users.find((user: User) => user.id === editingUserId) : undefined}
             />
           </DialogContent>
         </Dialog>
+
       </div>
 
       <SearchBar
@@ -142,6 +173,7 @@ export const Users = () => {
       />
 
       <UserTable
+        key={`user-table-${tableKey}`}
         users={filteredUsers}
         classes={classes}
         selectedUsers={selectedUsers}
@@ -149,9 +181,11 @@ export const Users = () => {
         onAssign={handleAssignClass}
         onRemove={handleRemoveFromClass}
         onDelete={deleteUserMutation.mutate}
+        onEdit={handleEditUser}
         isDeleting={deleteUserMutation.isPending}
         isAssigning={assignClassMutation.isPending}
         isRemoving={removeFromClassMutation.isPending}
+        isEditing={updateUserMutation.isPending}
       />
 
       {selectedUsers.length > 0 && (

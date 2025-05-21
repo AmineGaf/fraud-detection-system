@@ -1,4 +1,4 @@
-import type { Class } from '@/types/users';
+import type { AddUser, Class } from '@/types/users';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -21,6 +21,11 @@ export const createUser = async (userData: {
 
 export const deleteUser = async (userId: number) => {
   await axios.delete(`${API_BASE_URL}/users/${userId}`);
+};
+
+export const updateUser = async (userId: number, userData: Omit<AddUser, "id"> & { password?: string }) => {
+  const response = await axios.put(`${API_BASE_URL}/users/${userId}`, userData);
+  return response.data;
 };
 
 

@@ -22,6 +22,7 @@ import type { Class, User } from "@/types/users";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "../ui/checkbox";
 import { AssignClassPopover } from "./AssignClassPopover";
+import { useState } from "react";
 
 interface UserTableProps {
   users: User[];
@@ -31,9 +32,11 @@ interface UserTableProps {
   onAssign: (userId: number, classId: number) => void;
   onRemove: (userId: number, classId: number) => void;
   onDelete: (userId: number) => void;
+  onEdit: (userId: number) => void; // Add this
   isDeleting: boolean;
   isAssigning: boolean;
   isRemoving?: boolean;
+  isEditing?: boolean;
 }
 
 export const UserTable = ({
@@ -44,10 +47,16 @@ export const UserTable = ({
   onAssign,
   onRemove,
   onDelete,
+  onEdit,
   isDeleting,
   isAssigning,
   isRemoving = false,
+  isEditing,
 }: UserTableProps) => {
+
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+
+
   return (
     <div className="rounded-lg border overflow-hidden">
       <Table>
@@ -128,7 +137,7 @@ export const UserTable = ({
                           </button>
                         </Badge>
                       ))}
-                      {user.classes?.length > 2 && ( // Show "+X more" if there are additional classes
+                      {user.classes && user.classes?.length > 2 && ( // Show "+X more" if there are additional classes
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Badge variant="outline" className="bg-gray-100 cursor-pointer">
@@ -169,15 +178,35 @@ export const UserTable = ({
                 </TableCell>
                 <TableCell>{user.institutional_id || "-"}</TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={openDropdownId === user.id}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setOpenDropdownId(user.id);
+                      } else {
+                        setOpenDropdownId(null);
+                      }
+                    }}
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      {user.classes.length > 0 && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          onEdit(user.id);
+                          setOpenDropdownId(null); 
+                        }}
+                        disabled={isEditing}
+                      >
+                        {isEditing ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : null}
+                        Edit
+                      </DropdownMenuItem>
+                      {user.classes && user.classes.length > 0 && (
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>
                             Remove from Class

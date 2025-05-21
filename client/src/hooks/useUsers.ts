@@ -3,6 +3,7 @@ import { fetchUsers, createUser, deleteUser, bulkAssignClass, assignClassToUser,
 import { toast } from "sonner";
 import { useState } from "react";
 import type { AddUser, Class } from "@/types/users";
+import axios from "axios";
 
 export const useUsersData = () => {
   return useQuery({
@@ -55,13 +56,11 @@ export const useUserForm = (onSubmit: (formData: Omit<AddUser, "id"> & { passwor
 
     try {
       if (!form.full_name || !form.email) {
-        toast.error("Full name and email are required");
-        return;
+        throw new Error("Full name and email are required");
       }
 
       if (form.role_id !== 1 && !form.password) {
-        toast.error("Password is required for non-student roles");
-        return;
+        throw new Error("Password is required for non-student roles");
       }
 
       await onSubmit(form);
@@ -74,7 +73,7 @@ export const useUserForm = (onSubmit: (formData: Omit<AddUser, "id"> & { passwor
         password: ""
       });
     } catch (error) {
-      throw error
+      throw error;
     }
   };
 
@@ -99,18 +98,15 @@ export const useUserForm = (onSubmit: (formData: Omit<AddUser, "id"> & { passwor
   return {
     form,
     handleSubmit,
-    handleChange
+    handleChange,
+    setForm // Add this to allow external form updates
   };
 };
 
-// Add these to your existing hooks
 export const useClassesData = () => {
-  return useQuery<Class[]>({ 
+  return useQuery<Class[], Error>({
     queryKey: ['classes'],
     queryFn: fetchClasses,
-    onError: (error: Error) => {
-      toast.error("Failed to load classes: " + error.message);
-    }
   });
 };
 
@@ -173,6 +169,24 @@ export const useRemoveFromClass = () => {
       } else {
         toast.error("Failed to remove user from class: " + error.message);
       }
+    }
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, userData }: { userId: number; userData: Omit<AddUser, "id"> & { password?: string } }) => {
+      const response = await axios.patch(`http://localhost:8000/users/${userId}`, userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success("User updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
     }
   });
 };

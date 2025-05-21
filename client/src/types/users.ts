@@ -30,9 +30,11 @@ export type AddUser = {
 };
 
 export interface AddUserFormProps {
-    onSubmit: (user: Omit<AddUser, "id"> & { password?: string }) => Promise<void>;
+    onSubmit: (data: Omit<AddUser, "id"> & { password?: string }) => Promise<void>;
     onSuccess: () => void;
     isLoading: boolean;
     error: unknown;
+    userId?: number | null;
+    isEditMode?: boolean;
+    initialData?: User; // Add this
 }
-
