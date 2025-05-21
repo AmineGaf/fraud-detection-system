@@ -19,7 +19,6 @@ export const AddUserForm = ({
         onSuccess();
     });
 
-    // Load user data if in edit mode
     useEffect(() => {
         if (isEditMode && initialData) {
             setForm({
@@ -27,7 +26,7 @@ export const AddUserForm = ({
                 email: initialData.email,
                 institutional_id: initialData.institutional_id || '',
                 role_id: initialData.role.id,
-                password: '' // Don't pre-fill password
+                password: ''
             });
         }
     }, [isEditMode, initialData, setForm]);

@@ -99,7 +99,7 @@ export const useUserForm = (onSubmit: (formData: Omit<AddUser, "id"> & { passwor
     form,
     handleSubmit,
     handleChange,
-    setForm // Add this to allow external form updates
+    setForm
   };
 };
 

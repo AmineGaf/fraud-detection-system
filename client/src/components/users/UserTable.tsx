@@ -32,7 +32,7 @@ interface UserTableProps {
   onAssign: (userId: number, classId: number) => void;
   onRemove: (userId: number, classId: number) => void;
   onDelete: (userId: number) => void;
-  onEdit: (userId: number) => void; // Add this
+  onEdit: (userId: number) => void;
   isDeleting: boolean;
   isAssigning: boolean;
   isRemoving?: boolean;
@@ -118,7 +118,7 @@ export const UserTable = ({
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <div className="flex flex-wrap gap-1">
-                      {user.classes?.slice(0, 2).map((classItem) => ( // Only show first 2 classes
+                      {user.classes?.slice(0, 2).map((classItem) => (
                         <Badge
                           key={classItem.id}
                           variant="outline"
@@ -137,7 +137,7 @@ export const UserTable = ({
                           </button>
                         </Badge>
                       ))}
-                      {user.classes && user.classes?.length > 2 && ( // Show "+X more" if there are additional classes
+                      {user.classes && user.classes?.length > 2 && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Badge variant="outline" className="bg-gray-100 cursor-pointer">
@@ -145,7 +145,7 @@ export const UserTable = ({
                             </Badge>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
-                            {user.classes?.slice(2).map((classItem) => ( // Show remaining classes in dropdown
+                            {user.classes?.slice(2).map((classItem) => (
                               <DropdownMenuItem
                                 key={classItem.id}
                                 className="flex items-center justify-between"
