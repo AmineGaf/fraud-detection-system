@@ -19,6 +19,8 @@ import { MoreHorizontal, Loader2 } from "lucide-react";
 import type { Class } from "@/types/classes";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "../ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { User } from "lucide-react"; 
 
 interface ClassTableProps {
     classes: Class[];
@@ -40,10 +42,21 @@ export const ClassTable = ({
     isEditing,
 }: ClassTableProps) => {
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [viewUsersDialogOpen, setViewUsersDialogOpen] = useState(false);
+    const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+
+    console.log(classes)
 
     const handleEdit = (classId: number) => {
-        setOpenDropdownId(null); // Close dropdown before editing
+        setOpenDropdownId(null);
         onEdit(classId);
+    };
+
+    const handleViewUsers = (cls: Class) => {
+        setSelectedClass(cls);
+        console.log(cls)
+        setViewUsersDialogOpen(true);
+        setOpenDropdownId(null);
     };
 
     return (
@@ -118,6 +131,12 @@ export const ClassTable = ({
                                                 Edit
                                             </DropdownMenuItem>
                                             <DropdownMenuItem
+                                                onClick={() => handleViewUsers(cls)}
+                                            >
+                                                <User className="h-4 w-4 mr-2" />
+                                                View Users
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
                                                 className="text-destructive"
                                                 onClick={() => {
                                                     setOpenDropdownId(null);
@@ -147,6 +166,43 @@ export const ClassTable = ({
                     Showing {classes.length} of {classes.length} classes
                 </TableCaption>
             </Table>
+            <Dialog open={viewUsersDialogOpen} onOpenChange={setViewUsersDialogOpen}>
+                <DialogContent className="max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            Users in {selectedClass?.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {selectedClass?.users && selectedClass.users.length > 0 ? (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-4 gap-4 font-semibold border-b pb-2">
+                                <div>Name</div>
+                                <div>Email</div>
+                                <div>Role</div>
+                                <div>Joined At</div>
+                            </div>
+                            {selectedClass.users.map((user) => (
+                                <div key={user.id} className="grid grid-cols-4 gap-4 py-2 border-b">
+                                    <div>{user.full_name}</div>
+                                    <div className="text-muted-foreground">{user.email}</div>
+                                    <div>
+                                        <Badge variant={user.is_professor ? "default" : "secondary"}>
+                                            {user.is_professor ? "Supervisor" : "Student"}
+                                        </Badge>
+                                    </div>
+                                    <div className="text-muted-foreground text-sm">
+                                        {new Date(user.joined_at).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                            No users assigned to this class
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

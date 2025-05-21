@@ -1,4 +1,5 @@
 import type { AddClass, Class } from '@/types/classes';
+import type { User } from '@/types/users';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -22,3 +23,9 @@ export const updateClass = async (classId: number, classData: AddClass) => {
 export const deleteClass = async (classId: number) => {
     await axios.delete(`${API_BASE_URL}/classes/${classId}`);
 };
+
+
+export const fetchUsersByClass = async (classId: number): Promise<User[]> => {
+    const response = await axios.get(`${API_BASE_URL}/classes/${classId}/users`);
+    return response.data;
+  };

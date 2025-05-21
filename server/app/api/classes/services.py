@@ -1,16 +1,31 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from .models import Class, UserClassAssociation
-from .schemas import ClassCreate, ClassUpdate
+from .schemas import ClassCreate, ClassResponse, ClassUpdate
 
 class ClassService:
     @staticmethod
-    def get_class(db: Session, class_id: int) -> Optional[Class]:
-        return db.query(Class).filter(Class.id == class_id).first()
+    def get_classes(db: Session, skip: int = 0, limit: int = 100) -> List[ClassResponse]:
+        db_classes = (
+            db.query(Class)
+            .options(joinedload(Class.users).joinedload(UserClassAssociation.user))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        return [ClassResponse.from_orm_with_users(c) for c in db_classes]
 
     @staticmethod
-    def get_classes(db: Session, skip: int = 0, limit: int = 100) -> List[Class]:
-        return db.query(Class).offset(skip).limit(limit).all()
+    def get_class(db: Session, class_id: int) -> Optional[ClassResponse]:
+        db_class = (
+            db.query(Class)
+            .options(joinedload(Class.users).joinedload(UserClassAssociation.user))
+            .filter(Class.id == class_id)
+            .first()
+        )
+        if db_class:
+            return ClassResponse.from_orm_with_users(db_class)
+        return None
 
     @staticmethod
     def create_class(db: Session, class_data: ClassCreate) -> Class:
