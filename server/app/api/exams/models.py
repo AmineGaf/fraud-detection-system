@@ -11,6 +11,7 @@ class Exam(Base):
     name = Column(String(100), nullable=False)
     exam_date = Column(DateTime(timezone=True), nullable=False)
     status = Column(String(20), default="upcoming")  
+    sale = Column(String(20), nullable=True)
     fraud_status = Column(Text, nullable=True)  # AI-generated fraud report
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -3,9 +3,12 @@ import type { Exam, AddExam, UpdateExam } from '@/types/exams';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-export const fetchExams = async (skip: number = 0, limit: number = 100): Promise<Exam[]> => {
+export const fetchExams = async (skip: number = 0, limit: number = 100, token?: string): Promise<Exam[]> => {
   const response = await axios.get(`${API_BASE_URL}/exams`, {
-    params: { skip, limit }
+    params: { skip, limit },
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
   });
   return response.data;
 };
@@ -25,8 +28,12 @@ export const fetchExam = async (examId: number): Promise<Exam> => {
   const response = await axios.get(`${API_BASE_URL}/exams/${examId}`);
   return response.data;
 };
-export const createExam = async (examData: AddExam): Promise<Exam> => {
-  const response = await axios.post(`${API_BASE_URL}/exams`, examData);
+export const createExam = async (examData: AddExam, token?: string): Promise<Exam> => {
+  const response = await axios.post(`${API_BASE_URL}/exams`, examData, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 

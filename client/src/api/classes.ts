@@ -5,8 +5,12 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8000';
 
 
-export const fetchClasses = async (): Promise<Class[]> => {
-    const response = await axios.get(`${API_BASE_URL}/classes`);
+export const fetchClasses = async (token?: string): Promise<Class[]> => {
+    const response = await axios.get(`${API_BASE_URL}/classes`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     return response.data;
 };
 

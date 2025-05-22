@@ -6,11 +6,13 @@ import {
   deleteClass as apiDeleteClass,
 } from "@/api/classes";
 import type { AddClass } from "@/types/classes";
+import { useAuth } from "@/context/AuthContext";
 
 export const useClassesData = () => {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ["classes"],
-    queryFn: fetchClasses,
+    queryFn: () => fetchClasses(user?.token),
   });
 };
 

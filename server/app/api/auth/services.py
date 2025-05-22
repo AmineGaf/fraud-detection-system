@@ -62,12 +62,22 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: An
         raise credentials_exception
     return user
 
-async def get_current_active_admin(
+async def get_current_admin(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
-    if current_user.role.name not in ["admin", "supervisor"]:
+    if current_user.role_id != 3:  # Only admin
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Admin privileges required"
+        )
+    return current_user
+
+async def get_current_supervisor(
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    if current_user.role_id not in [2, 3]:  # Supervisor or admin
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Supervisor privileges required"
         )
     return current_user

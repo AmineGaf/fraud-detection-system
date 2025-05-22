@@ -19,7 +19,7 @@ import { ExamTable } from "@/components/exams/ExamsTable";
 import { ExamsSearchBar } from "@/components/exams/SearchBar";
 import type { Exam, AddExam } from "@/types/exams";
 import { ExamState } from "@/types/exams";
-import { useClassesData } from "@/hooks/useClasses";
+import { useClassesData } from "@/hooks/useClasses"; 
 
 export const Exams = () => {
   const [searchTerm, setSearchTerm] = useState("");

@@ -9,13 +9,15 @@ import {
   deleteExam as apiDeleteExam,
 } from "@/api/exams";
 import type { Exam, AddExam, UpdateExam } from "@/types/exams";
+import { useAuth } from "@/context/AuthContext";
 
 export const useExamsData = (classId?: number, skip: number = 0, limit: number = 100) => {
+  const { user } = useAuth();
   return useQuery<Exam[]>({
     queryKey: classId ? ["exams", classId, skip, limit] : ["exams", skip, limit],
-    queryFn: classId 
+    queryFn: classId
       ? () => fetchExamsByClass(classId, skip, limit)
-      : () => fetchExams(skip, limit),
+      : () => fetchExams(skip, limit, user?.token),
   });
 };
 
@@ -29,9 +31,10 @@ export const useExamData = (examId: number) => {
 };
 
 export const useCreateExam = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Exam, Error, AddExam>({
-    mutationFn: apiCreateExam,
+    mutationFn: (examData: AddExam) => apiCreateExam(examData, user?.token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exams"] });
     },

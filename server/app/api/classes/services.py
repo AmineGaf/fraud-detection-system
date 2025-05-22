@@ -1,28 +1,50 @@
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
+from ..users.models import User
 from .models import Class, UserClassAssociation
 from .schemas import ClassCreate, ClassResponse, ClassUpdate
 
 class ClassService:
     @staticmethod
-    def get_classes(db: Session, skip: int = 0, limit: int = 100) -> List[ClassResponse]:
-        db_classes = (
-            db.query(Class)
-            .options(joinedload(Class.users).joinedload(UserClassAssociation.user))
-            .offset(skip)
-            .limit(limit)
-            .all()
+    def get_classes(db: Session, user: Optional[User] = None, skip: int = 0, limit: int = 100) -> List[ClassResponse]:
+        query = db.query(Class).options(
+            joinedload(Class.users).joinedload(UserClassAssociation.user)
         )
+        
+        # If user is supervisor (not admin), filter classes they're assigned to
+        if user and user.role_id == 2:
+            query = query.join(Class.users).filter(
+                UserClassAssociation.user_id == user.id
+            )
+            
+        db_classes = query.offset(skip).limit(limit).all()
         return [ClassResponse.from_orm_with_users(c) for c in db_classes]
 
     @staticmethod
-    def get_class(db: Session, class_id: int) -> Optional[ClassResponse]:
-        db_class = (
-            db.query(Class)
-            .options(joinedload(Class.users).joinedload(UserClassAssociation.user))
-            .filter(Class.id == class_id)
-            .first()
-        )
+    def get_class(db: Session, class_id: int, user: Optional[User] = None) -> Optional[ClassResponse]:
+        query = db.query(Class).options(
+            joinedload(Class.users).joinedload(UserClassAssociation.user)
+        ).filter(Class.id == class_id)
+        
+        # If user is supervisor (not admin), verify they're assigned to this class
+        if user and user.role_id == 2:
+            query = query.join(Class.users).filter(
+                UserClassAssociation.user_id == user.id
+            )
+            
+        db_class = query.first()
+        if db_class:
+            return ClassResponse.from_orm_with_users(db_class)
+        return None
+
+    @staticmethod
+    def get_class(db: Session, class_id: int, current_user: User) -> Optional[ClassResponse]:
+        query = db.query(Class).options(joinedload(Class.users).joinedload(UserClassAssociation.user)).filter(Class.id == class_id)
+
+        if current_user.role_id == 2:
+            query = query.join(UserClassAssociation).filter(UserClassAssociation.user_id == current_user.id)
+
+        db_class = query.first()
         if db_class:
             return ClassResponse.from_orm_with_users(db_class)
         return None
