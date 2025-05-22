@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { PasswordResetPage } from './pages/PasswordResetPage';
 import { Classes } from './pages/Classes';
+import { ExamDetailsPage } from './components/exams/ExamDetailsPage';
 
 function AppLayout() {
 
@@ -33,6 +34,7 @@ function AppLayout() {
               {/* Regular protected routes */}
               <Route element={<PrivateRoute />}>
                 <Route path="/exams" element={<Exams />} />
+                <Route path='/exams/:examId' element={<ExamDetailsPage />} />
                 <Route path="/classes" element={<Classes />} />
                 <Route path="/" element={
                   <>

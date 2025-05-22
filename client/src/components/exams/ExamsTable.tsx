@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "../ui/checkbox";
 import { format } from "date-fns";
 import { ExamState } from "@/types/exams";
-import { ExamDetailsDialog } from "./ExamDetailsDialog";
+import { useNavigate } from "react-router-dom";
 
 interface ExamTableProps {
   exams: Exam[];
@@ -43,7 +43,7 @@ export const ExamTable = ({
   isEditing = false,
 }: ExamTableProps) => {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-  const [viewingExam, setViewingExam] = useState<Exam | null>(null);
+  const navigate = useNavigate();
 
   const getStatusBadgeVariant = (status: ExamStatus) => {
     switch (status) {
@@ -71,6 +71,11 @@ export const ExamTable = ({
       ? [...selectedExams, examId]
       : selectedExams.filter(id => id !== examId);
     onSelectExams(newSelection);
+  };
+
+  const handleViewDetails = (examId: number) => {
+    setOpenDropdownId(null);
+    navigate(`/exams/${examId}`);
   };
 
   return (
@@ -126,10 +131,7 @@ export const ExamTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => {
-                          setOpenDropdownId(null);
-                          setViewingExam(exam);
-                        }}
+                        onClick={() => handleViewDetails(exam.id)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
@@ -171,11 +173,6 @@ export const ExamTable = ({
           </TableCaption>
         )}
       </Table>
-      <ExamDetailsDialog
-        exam={viewingExam}
-        open={!!viewingExam}
-        onOpenChange={(open) => !open && setViewingExam(null)}
-      />
     </div>
   );
 };
