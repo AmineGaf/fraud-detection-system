@@ -1,4 +1,3 @@
-// src/hooks/useExams.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchExams,
@@ -21,11 +20,11 @@ export const useExamsData = (classId?: number, skip: number = 0, limit: number =
   });
 };
 
-// Add error handling to other hooks as needed
 export const useExamData = (examId: number) => {
+  const { user } = useAuth();
   return useQuery<Exam, Error>({
     queryKey: ["exams", examId],
-    queryFn: () => fetchExam(examId),
+    queryFn: () => fetchExam(examId, user?.token),
     enabled: !!examId,
   });
 };
@@ -42,9 +41,10 @@ export const useCreateExam = () => {
 };
 
 export const useUpdateExam = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Exam, Error, { examId: number; examData: UpdateExam }>({
-    mutationFn: ({ examId, examData }) => apiUpdateExam(examId, examData),
+    mutationFn: ({ examId, examData }) => apiUpdateExam(examId, examData, user?.token),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["exams"] });
       queryClient.invalidateQueries({ queryKey: ["exams", data.id] });
@@ -56,9 +56,10 @@ export const useUpdateExam = () => {
 };
 
 export const useDeleteExam = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<void, Error, number>({
-    mutationFn: apiDeleteExam,
+    mutationFn: (examId: number) => apiDeleteExam(examId, user?.token),
     onSuccess: (_, examId) => {
       queryClient.invalidateQueries({ queryKey: ["exams"] });
       queryClient.removeQueries({ queryKey: ["exams", examId] });

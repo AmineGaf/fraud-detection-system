@@ -17,9 +17,10 @@ export const useClassesData = () => {
 };
 
 export const useCreateClass = () => {
+  const { user } = useAuth()
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: apiCreateClass,
+    mutationFn: (classeData: AddClass) => apiCreateClass(classeData, user?.token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     },
@@ -27,10 +28,11 @@ export const useCreateClass = () => {
 };
 
 export const useUpdateClass = () => {
+  const { user } = useAuth()
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ classId, classData }: { classId: number; classData: AddClass }) =>
-      apiUpdateClass(classId, classData),
+      apiUpdateClass(classId, classData, user?.token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     },
@@ -38,9 +40,10 @@ export const useUpdateClass = () => {
 };
 
 export const useDeleteClass = () => {
+  const { user } = useAuth()
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (classId: number) => apiDeleteClass(classId),
+    mutationFn: (classId: number) => apiDeleteClass(classId, user?.token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     },

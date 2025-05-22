@@ -19,9 +19,10 @@ import { ExamTable } from "@/components/exams/ExamsTable";
 import { ExamsSearchBar } from "@/components/exams/SearchBar";
 import type { Exam, AddExam } from "@/types/exams";
 import { ExamState } from "@/types/exams";
-import { useClassesData } from "@/hooks/useClasses"; 
+import { useClassesData } from "@/hooks/useClasses";
 
 export const Exams = () => {
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExams, setSelectedExams] = useState<number[]>([]);
@@ -29,7 +30,7 @@ export const Exams = () => {
   const [tableKey, setTableKey] = useState(0);
   const [filters, setFilters] = useState<{
     class_id?: string;
-    status?: string; 
+    status?: string;
   }>({});
 
   const { data: exams = [], isLoading: isExamsLoading } = useExamsData();
@@ -38,13 +39,13 @@ export const Exams = () => {
   const createExamMutation = useCreateExam();
   const deleteExamMutation = useDeleteExam();
   const updateExamMutation = useUpdateExam();
-  
+
 
   const filteredExams = exams.filter((exam: Exam) => {
     const matchesSearch = exam.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = !filters.class_id || String(exam.class_id) === filters.class_id;
-    const matchesStatus = !filters.status || exam.status === filters.status; 
-    
+    const matchesStatus = !filters.status || exam.status === filters.status;
+
     return matchesSearch && matchesClass && matchesStatus;
   });
 

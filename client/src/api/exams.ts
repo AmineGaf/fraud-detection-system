@@ -24,8 +24,12 @@ export const fetchExamsByClass = async (
   return response.data;
 };
 
-export const fetchExam = async (examId: number): Promise<Exam> => {
-  const response = await axios.get(`${API_BASE_URL}/exams/${examId}`);
+export const fetchExam = async (examId: number, token?: string): Promise<Exam> => {
+  const response = await axios.get(`${API_BASE_URL}/exams/${examId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 export const createExam = async (examData: AddExam, token?: string): Promise<Exam> => {
@@ -37,11 +41,19 @@ export const createExam = async (examData: AddExam, token?: string): Promise<Exa
   return response.data;
 };
 
-export const updateExam = async (examId: number, examData: UpdateExam): Promise<Exam> => {
-  const response = await axios.put(`${API_BASE_URL}/exams/${examId}`, examData);
+export const updateExam = async (examId: number, examData: UpdateExam, token?: string): Promise<Exam> => {
+  const response = await axios.put(`${API_BASE_URL}/exams/${examId}`, examData, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
-export const deleteExam = async (examId: number): Promise<void> => {
-  await axios.delete(`${API_BASE_URL}/exams/${examId}`);
+export const deleteExam = async (examId: number, token?: string): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/exams/${examId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };

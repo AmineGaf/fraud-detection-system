@@ -15,7 +15,7 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 
 export const SidebarComponent = () => {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -23,6 +23,18 @@ export const SidebarComponent = () => {
         toast.success('You have been logged out successfully');
         navigate('/login');
     };
+
+    // Define base menu items
+    const menuItems = [
+        { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+        { icon: BookOpen, label: "Classes", path: "/classes" },
+        { icon: FileText, label: "Exams", path: "/exams" },
+    ];
+
+    // Add Users menu item only for admin (role_id = 3)
+    if (user?.role_id === 3) {
+        menuItems.splice(2, 0, { icon: Users, label: "Users", path: "/users" });
+    }
 
     return (
         <Sidebar className="bg-sidebar border-r border-border shadow-sm">
@@ -49,15 +61,9 @@ export const SidebarComponent = () => {
                 </SidebarTrigger>
             </SidebarHeader>
 
-            {/* Rest of your sidebar content remains the same */}
             <SidebarContent className='p-4'>
                 <SidebarMenu>
-                    {[
-                        { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-                        { icon: BookOpen, label: "Classes", path: "/classes" },
-                        { icon: Users, label: "Users", path: "/users" },
-                        { icon: FileText, label: "Exams", path: "/exams" },
-                    ].map((item, index) => (
+                    {menuItems.map((item, index) => (
                         <SidebarMenuItem key={index}>
                             <Link to={item.path} className="w-full">
                                 <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-colors duration-150">

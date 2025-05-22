@@ -13,6 +13,7 @@ import { PasswordResetPage } from './pages/PasswordResetPage';
 import { Classes } from './pages/Classes';
 
 function AppLayout() {
+
   const location = useLocation();
   const isLoginPage = location.pathname === '/login' || location.pathname === '/reset-password';
 
@@ -28,9 +29,10 @@ function AppLayout() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<PasswordResetPage />} />
+              
+              {/* Regular protected routes */}
               <Route element={<PrivateRoute />}>
                 <Route path="/exams" element={<Exams />} />
-                <Route path="/users" element={<Users />} />
                 <Route path="/classes" element={<Classes />} />
                 <Route path="/" element={
                   <>
@@ -42,6 +44,11 @@ function AppLayout() {
                     </div>
                   </>
                 } />
+              </Route>
+              
+              {/* Admin-only protected routes */}
+              <Route element={<PrivateRoute requiredRole={3} />}>
+                <Route path="/users" element={<Users />} />
               </Route>
             </Routes>
           </div>
