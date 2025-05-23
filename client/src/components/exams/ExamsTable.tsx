@@ -108,7 +108,12 @@ export const ExamTable = ({
                     aria-label={`Select exam ${exam.name}`}
                   />
                 </TableCell>
-                <TableCell className="font-medium">{exam.name}</TableCell>
+                <TableCell className="font-medium">
+                  {exam.name}
+                  {exam.fraud_status && (
+                    <span className="ml-2 text-xs text-red-500">(Fraud Detected)</span>
+                  )}
+                </TableCell>
                 <TableCell>{`Class ${exam.class_info.name}`}</TableCell>
                 <TableCell>
                   {format(new Date(exam.exam_date), "PPpp")}
