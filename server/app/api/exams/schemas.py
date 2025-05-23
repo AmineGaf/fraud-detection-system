@@ -1,8 +1,10 @@
+from typing import List, Dict, Any
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 from enum import Enum
 from .models import Exam
+
 
 class ExamStatus(str, Enum):
     UPCOMING = "upcoming"
@@ -23,6 +25,7 @@ class ExamUpdate(BaseModel):
     exam_date: Optional[datetime] = None
     status: Optional[ExamStatus] = None
     fraud_status: Optional[str] = None
+    fraud_evidence: Optional[List[Dict[str, Any]]] = None
     
 
 class ClassInfo(BaseModel):
@@ -32,6 +35,7 @@ class ClassInfo(BaseModel):
 class ExamResponse(ExamBase):
     id: int
     fraud_status: Optional[str] = None
+    fraud_evidence: Optional[List[Dict[str, Any]]] = None 
     created_at: datetime
     class_info: ClassInfo
     

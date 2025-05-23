@@ -22,6 +22,7 @@ export const ExamDetailsPage = () => {
   const exam = exams.find((e) => e.id === Number(examId));
 
   const handleFraudDetected = (data: FraudEvidence) => {
+
     updateExam({
       examId: Number(examId),
       examData: {
@@ -29,8 +30,15 @@ export const ExamDetailsPage = () => {
         fraud_evidence: [...(exam?.fraud_evidence || []), data]
       }
     }, {
-      onSuccess: () => refetch()
+      onSuccess: () => {
+        console.log("Exam updated successfully!");
+        refetch();
+      },
+      onError: (err) => {
+        console.error("Failed to update exam:", err);
+      }
     });
+    
   };
 
   const handleSessionStart = () => {
@@ -73,6 +81,10 @@ export const ExamDetailsPage = () => {
       </div>
     );
   }
+
+
+  console.log("Exam details: ", exam)
+
 
   return (
     <div className="space-y-6 p-4">
@@ -180,14 +192,15 @@ export const ExamDetailsPage = () => {
           </TabsContent>
 
           <TabsContent value="monitoring">
+
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Fraud Detection</CardTitle>
                     <CardDescription>
-                      {isMonitoringActive 
-                        ? "Live monitoring in progress" 
+                      {isMonitoringActive
+                        ? "Live monitoring in progress"
                         : exam.fraud_status
                           ? "Previous detections"
                           : "No suspicious activity detected"}
@@ -212,7 +225,7 @@ export const ExamDetailsPage = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="evidence">
+          <TabsContent key={exam.fraud_evidence?.length} value="evidence">
             {exam.fraud_evidence?.length ? (
               <Card>
                 <CardHeader>

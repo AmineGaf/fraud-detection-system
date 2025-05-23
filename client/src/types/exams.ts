@@ -29,7 +29,7 @@ export interface Exam {
   exam_date: string;
   class_id: number;
   status: ExamStatus;
-  sale?: string; // If you're using this field
+  sale?: string;
   fraud_status?: string | null;
   fraud_evidence?: FraudEvidence[] | null;
   created_at: string;
