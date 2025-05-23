@@ -12,6 +12,7 @@ interface ClassInfo {
 }
 
 export interface FraudEvidence {
+  examId: number;
   timestamp: string;
   screenshot: string;
   detections: Array<{
