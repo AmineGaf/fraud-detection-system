@@ -61,7 +61,6 @@ def update_exam(
     exam_id: int,
     exam_data: ExamUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin) 
 ):
     db_exam = ExamService.update_exam(db, exam_id=exam_id, exam_data=exam_data)
     if not db_exam:
