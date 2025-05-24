@@ -37,26 +37,26 @@ export const SidebarComponent = () => {
     }
 
     return (
-        <Sidebar className="bg-sidebar border-r border-border shadow-sm">
+        <Sidebar className="bg-sidebar border-r border-border shadow-sidebar transition-all duration-300 ease-in-out">
             <SidebarHeader className="p-4 flex flex-row items-center justify-between border-b border-border">
                 <Link to="/" className="flex items-center gap-3 group-data-[state=collapsed]/sidebar:justify-center">
-                    {/* Enhanced Logo Container */}
-                    <div className="relative">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-200"></div>
-                        <div className="p-2 border-2 border-indigo-400 rounded-lg flex items-center justify-center">
-                            <Eye className="w-5 h-5 text-indigo-500" />
+                    {/* Modern Logo with Gradient */}
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg blur opacity-20 group-hover:opacity-30 transition-all duration-300"></div>
+                        <div className="relative p-2 bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-lg flex items-center justify-center shadow-sm">
+                            <Eye className="w-5 h-5 text-indigo-600" />
                         </div>
                     </div>
 
-                    {/* Enhanced Text Treatment */}
-                    <span className="text-xl font-bold text-gray-900 dark:text-white group-data-[state=collapsed]/sidebar:hidden flex items-center gap-1">
-                        <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    {/* Modern Text Treatment */}
+                    <span className="text-xl font-bold group-data-[state=collapsed]/sidebar:hidden flex items-center gap-1">
+                        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             Exam
                         </span>
-                        <span className="text-gray-700 dark:text-gray-300">Eye</span>
+                        <span className="text-gray-700">Eye</span>
                     </span>
                 </Link>
-                <SidebarTrigger className="md:hidden p-1 rounded-md hover:bg-accent text-sidebar-foreground">
+                <SidebarTrigger className="md:hidden p-1.5 rounded-md hover:bg-accent text-sidebar-foreground transition-colors">
                     <PanelLeft className="w-5 h-5" />
                 </SidebarTrigger>
             </SidebarHeader>
@@ -66,28 +66,34 @@ export const SidebarComponent = () => {
                     {menuItems.map((item, index) => (
                         <SidebarMenuItem key={index}>
                             <Link to={item.path} className="w-full">
-                                <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-colors duration-150">
-                                    <item.icon className="w-5 h-5 text-sidebar-foreground" />
-                                    <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground">
-                                        {item.label}
-                                    </span>
+                                <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
+                                    <div className="relative flex items-center gap-3 p-2">
+                                        <item.icon className="w-5 h-5 text-sidebar-foreground group-hover:text-sidebar-primary transition-colors" />
+                                        <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-sidebar-primary transition-colors">
+                                            {item.label}
+                                        </span>
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-sidebar-primary rounded-r-full transition-all duration-300"></div>
+                                    </div>
                                 </SidebarMenuButton>
                             </Link>
                         </SidebarMenuItem>
                     ))}
 
-                    <SidebarSeparator className="bg-border" />
+                    <SidebarSeparator className="bg-border my-2" />
 
                     <SidebarMenuItem>
                         <div
                             onClick={handleLogout}
                             className="w-full cursor-pointer"
                         >
-                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-colors duration-150">
-                                <LogOut className="w-5 h-5 text-sidebar-foreground" />
-                                <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground">
-                                    Logout
-                                </span>
+                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
+                                <div className="relative flex items-center gap-3 p-2">
+                                    <LogOut className="w-5 h-5 text-sidebar-foreground group-hover:text-red-500 transition-colors" />
+                                    <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-red-500 transition-colors">
+                                        Logout
+                                    </span>
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-red-500 rounded-r-full transition-all duration-300"></div>
+                                </div>
                             </SidebarMenuButton>
                         </div>
                     </SidebarMenuItem>
@@ -98,11 +104,14 @@ export const SidebarComponent = () => {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <Link to="/settings" className="w-full">
-                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-colors duration-150">
-                                <Settings className="w-5 h-5 text-sidebar-foreground" />
-                                <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground">
-                                    Settings
-                                </span>
+                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
+                                <div className="relative flex items-center gap-3 p-2">
+                                    <Settings className="w-5 h-5 text-sidebar-foreground group-hover:text-sidebar-primary transition-colors" />
+                                    <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-sidebar-primary transition-colors">
+                                        Settings
+                                    </span>
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-sidebar-primary rounded-r-full transition-all duration-300"></div>
+                                </div>
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>

@@ -22,7 +22,6 @@ import { ExamState } from "@/types/exams";
 import { useClassesData } from "@/hooks/useClasses";
 
 export const Exams = () => {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExams, setSelectedExams] = useState<number[]>([]);
@@ -39,7 +38,6 @@ export const Exams = () => {
   const createExamMutation = useCreateExam();
   const deleteExamMutation = useDeleteExam();
   const updateExamMutation = useUpdateExam();
-
 
   const filteredExams = exams.filter((exam: Exam) => {
     const matchesSearch = exam.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,18 +82,22 @@ export const Exams = () => {
   }));
 
   if (isExamsLoading || isClassesLoading) return (
-    <div className="p-4 flex items-center gap-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Loading data...
+    <div className="p-6 flex items-center justify-center gap-3 h-[300px]">
+      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <span className="text-muted-foreground">Loading exams data...</span>
     </div>
   );
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-6 animate-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Exam Management</h1>
-          <p className="text-muted-foreground">Manage all exams in the system</p>
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Exam Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage and monitor all system exams
+          </p>
         </div>
 
         <Dialog
@@ -109,14 +111,14 @@ export const Exams = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
               <Plus className="h-4 w-4" />
               Add Exam
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl rounded-lg">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg font-semibold">
                 {editingExamId ? "Edit Exam" : "Create New Exam"}
               </DialogTitle>
             </DialogHeader>
@@ -141,18 +143,20 @@ export const Exams = () => {
         statusOptions={statusOptions}
       />
 
-      <ExamTable
-        key={`exam-table-${tableKey}`}
-        exams={filteredExams}
-        selectedExams={selectedExams}
-        onSelectExams={setSelectedExams}
-        onDelete={deleteExamMutation.mutate}
-        onEdit={handleEditExam}
-        isDeleting={deleteExamMutation.isPending}
-      />
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <ExamTable
+          key={`exam-table-${tableKey}`}
+          exams={filteredExams}
+          selectedExams={selectedExams}
+          onSelectExams={setSelectedExams}
+          onDelete={deleteExamMutation.mutate}
+          onEdit={handleEditExam}
+          isDeleting={deleteExamMutation.isPending}
+        />
+      </div>
 
       {selectedExams.length > 0 && (
-        <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg border border-muted/30">
           <div className="text-sm text-muted-foreground">
             {selectedExams.length} exam(s) selected
           </div>
@@ -164,6 +168,7 @@ export const Exams = () => {
               setSelectedExams([]);
             }}
             disabled={deleteExamMutation.isPending}
+            className="shadow-sm hover:shadow-md transition-shadow"
           >
             {deleteExamMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -172,6 +177,13 @@ export const Exams = () => {
           </Button>
         </div>
       )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing <span className="font-medium">{filteredExams.length}</span> of{" "}
+          <span className="font-medium">{exams.length}</span> exams
+        </p>
+      </div>
     </div>
   );
 };

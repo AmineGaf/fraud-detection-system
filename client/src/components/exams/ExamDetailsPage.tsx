@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useExamsData, useUpdateExam } from "@/hooks/useExams";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertCircle, FileText, Video, VideoOff } from "lucide-react";
+import { ArrowLeft, AlertCircle, FileText, Video, VideoOff, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ export const ExamDetailsPage = () => {
   const exam = exams.find((e) => e.id === Number(examId));
 
   const handleFraudDetected = (data: FraudEvidence) => {
-
     updateExam({
       examId: Number(examId),
       examData: {
@@ -31,14 +30,9 @@ export const ExamDetailsPage = () => {
       }
     }, {
       onSuccess: () => {
-        console.log("Exam updated successfully!");
         refetch();
-      },
-      onError: (err) => {
-        console.error("Failed to update exam:", err);
       }
     });
-    
   };
 
   const handleSessionStart = () => {
@@ -62,7 +56,7 @@ export const ExamDetailsPage = () => {
   const clearFraud = () => {
     updateExam({
       examId: Number(examId),
-      examData: { fraud_status: null }
+      examData: { fraud_status: null, fraud_evidence: [] }
     }, {
       onSuccess: () => refetch()
     });
@@ -71,7 +65,7 @@ export const ExamDetailsPage = () => {
   if (!exam) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Alert variant="destructive" className="w-auto">
+        <Alert variant="destructive" className="w-auto max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Exam not found</AlertTitle>
           <AlertDescription>
@@ -82,33 +76,53 @@ export const ExamDetailsPage = () => {
     );
   }
 
-
-  console.log("Exam details: ", exam)
-
-
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-6 animate-in">
       <Button
         variant="outline"
         onClick={() => navigate(-1)}
-        className="gap-2"
+        className="gap-2 shadow-sm hover:shadow-md transition-shadow"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Exams
       </Button>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold">{exam.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              {exam.name}
+            </h1>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">Class {exam.class_info.name}</Badge>
-              <Badge>{exam.status.toLowerCase()}</Badge>
+              <Badge variant="outline" className="bg-gray-50 border-gray-200">
+                Class {exam.class_info.name}
+              </Badge>
+              <Badge 
+                variant="outline" 
+                className={
+                  exam.status === "ongoing" 
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : exam.status === "upcoming"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-gray-100 text-gray-700 border-gray-200"
+                }
+              >
+                {exam.status.toLowerCase()}
+              </Badge>
               {exam.fraud_status && (
-                <Badge variant="destructive">{exam.fraud_status.toLowerCase()}</Badge>
+                <Badge 
+                  variant="outline" 
+                  className={
+                    exam.fraud_status === "CONFIRMED"
+                      ? "bg-red-50 text-red-700 border-red-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
+                  }
+                >
+                  {exam.fraud_status.toLowerCase()}
+                </Badge>
               )}
               {isMonitoringActive && (
-                <Badge className="flex items-center gap-1">
+                <Badge className="flex items-center gap-1 bg-indigo-50 text-indigo-700 border-indigo-200">
                   <Video className="h-3 w-3" />
                   <span>Monitoring Active</span>
                 </Badge>
@@ -118,10 +132,20 @@ export const ExamDetailsPage = () => {
 
           {exam.fraud_status === "SUSPECTED" && (
             <div className="flex gap-2">
-              <Button variant="destructive" onClick={confirmFraud}>
+              <Button 
+                variant="destructive" 
+                onClick={confirmFraud}
+                className="gap-2 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <Check className="h-4 w-4" />
                 Confirm Fraud
               </Button>
-              <Button variant="outline" onClick={clearFraud}>
+              <Button 
+                variant="outline" 
+                onClick={clearFraud}
+                className="gap-2 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <X className="h-4 w-4" />
                 Dismiss Alert
               </Button>
             </div>
@@ -129,35 +153,42 @@ export const ExamDetailsPage = () => {
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList>
+          <TabsList className="bg-muted/30">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger value="evidence" disabled={!exam.fraud_evidence?.length}>
+            <TabsTrigger 
+              value="evidence" 
+              disabled={!exam.fraud_evidence?.length}
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               Evidence {exam.fraud_evidence?.length ? `(${exam.fraud_evidence.length})` : ''}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
             <div className="grid gap-6 md:grid-cols-2">
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader>
-                  <CardTitle>Exam Information</CardTitle>
+                  <CardTitle className="text-lg">Exam Information</CardTitle>
                   <CardDescription>Details about this examination</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Date</p>
-                      <p>{format(new Date(exam.exam_date), "PPpp")}</p>
+                      <p className="font-medium">{format(new Date(exam.exam_date), "PPpp")}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Duration</p>
-                      {/* <p>{exam.duration || '--'} minutes</p> */}
+                      <p className="font-medium">-- minutes</p>
                     </div>
                   </div>
 
                   {exam.fraud_status && (
-                    <Alert variant={exam.fraud_status === "CONFIRMED" ? "destructive" : "default"}>
+                    <Alert 
+                      variant={exam.fraud_status === "CONFIRMED" ? "destructive" : "default"}
+                      className="border"
+                    >
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>Fraud {exam.fraud_status === "CONFIRMED" ? "Confirmed" : "Suspected"}</AlertTitle>
                       <AlertDescription>
@@ -170,20 +201,20 @@ export const ExamDetailsPage = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader>
-                  <CardTitle>Exam Statistics</CardTitle>
+                  <CardTitle className="text-lg">Exam Statistics</CardTitle>
                   <CardDescription>Performance metrics</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Students</p>
-                      {/* <p>{exam.students?.length || 0}</p> */}
+                      <p className="font-medium">--</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Average Score</p>
-                      <p>--</p>
+                      <p className="font-medium">--</p>
                     </div>
                   </div>
                 </CardContent>
@@ -192,12 +223,11 @@ export const ExamDetailsPage = () => {
           </TabsContent>
 
           <TabsContent value="monitoring">
-
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Fraud Detection</CardTitle>
+                    <CardTitle className="text-lg">Fraud Detection</CardTitle>
                     <CardDescription>
                       {isMonitoringActive
                         ? "Live monitoring in progress"
@@ -207,7 +237,7 @@ export const ExamDetailsPage = () => {
                     </CardDescription>
                   </div>
                   {isMonitoringActive && (
-                    <div className="flex items-center gap-2 text-sm text-green-600">
+                    <div className="flex items-center gap-2 text-sm text-emerald-600">
                       <Video className="h-4 w-4" />
                       <span>Active</span>
                     </div>
@@ -227,17 +257,17 @@ export const ExamDetailsPage = () => {
 
           <TabsContent key={exam.fraud_evidence?.length} value="evidence">
             {exam.fraud_evidence?.length ? (
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader>
-                  <CardTitle>Fraud Evidence</CardTitle>
+                  <CardTitle className="text-lg">Fraud Evidence</CardTitle>
                   <CardDescription>
                     {exam.fraud_evidence.length} incident(s) recorded
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {exam.fraud_evidence.map((evidence, index) => (
-                    <div key={index} className="border rounded-lg p-3 space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
+                    <div key={index} className="border rounded-lg p-4 space-y-3 bg-white shadow-sm">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <FileText className="h-4 w-4" />
                         <span>
                           {format(new Date(evidence.timestamp), "PPpp")}
@@ -246,13 +276,13 @@ export const ExamDetailsPage = () => {
                       <img
                         src={evidence.screenshot}
                         alt={`Evidence ${index + 1}`}
-                        className="rounded-md border w-full aspect-video object-cover"
+                        className="rounded-md border w-full aspect-video object-cover shadow-inner"
                       />
                       <div className="text-sm space-y-1">
-                        <p className="font-medium">Detections:</p>
-                        <ul className="list-disc pl-5">
+                        <p className="font-medium text-foreground">Detections:</p>
+                        <ul className="list-disc pl-5 space-y-1">
                           {evidence.detections.map((det, i) => (
-                            <li key={i}>
+                            <li key={i} className="text-muted-foreground">
                               {det.class_name} ({Math.round(det.confidence * 100)}%)
                             </li>
                           ))}
@@ -263,7 +293,7 @@ export const ExamDetailsPage = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Alert>
+              <Alert className="border">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>No evidence recorded</AlertTitle>
                 <AlertDescription>

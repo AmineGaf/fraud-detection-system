@@ -78,23 +78,25 @@ export const Classes = () => {
     }
   };
 
-
   const programs = [...new Set(classes.map(cls => cls.studying_program))];
 
-
   if (isClassesLoading) return (
-    <div className="p-4 flex items-center gap-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Loading classes...
+    <div className="p-6 flex items-center justify-center gap-3 h-[300px]">
+      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <span className="text-muted-foreground">Loading classes...</span>
     </div>
   );
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-6 animate-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Class Management</h1>
-          <p className="text-muted-foreground">Manage all classes in the system</p>
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Class Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage all classes in the system
+          </p>
         </div>
 
         <Dialog
@@ -108,14 +110,14 @@ export const Classes = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
               <Plus className="h-4 w-4" />
               Add Class
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px] rounded-lg">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg font-semibold">
                 {editingClassId ? "Edit Class" : "Create New Class"}
               </DialogTitle>
             </DialogHeader>
@@ -143,19 +145,21 @@ export const Classes = () => {
         programs={programs}
       />
 
-      <ClassTable
-        key={`class-table-${tableKey}`}
-        classes={filteredClasses}
-        selectedClasses={selectedClasses}
-        onSelectClasses={setSelectedClasses}
-        onDelete={deleteClassMutation.mutate}
-        onEdit={handleEditClass}
-        isDeleting={deleteClassMutation.isPending}
-        isEditing={updateClassMutation.isPending}
-      />
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <ClassTable
+          key={`class-table-${tableKey}`}
+          classes={filteredClasses}
+          selectedClasses={selectedClasses}
+          onSelectClasses={setSelectedClasses}
+          onDelete={deleteClassMutation.mutate}
+          onEdit={handleEditClass}
+          isDeleting={deleteClassMutation.isPending}
+          isEditing={updateClassMutation.isPending}
+        />
+      </div>
 
       {selectedClasses.length > 0 && (
-        <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg border border-muted/30">
           <div className="text-sm text-muted-foreground">
             {selectedClasses.length} class(es) selected
           </div>
@@ -167,6 +171,7 @@ export const Classes = () => {
               setSelectedClasses([]);
             }}
             disabled={deleteClassMutation.isPending}
+            className="shadow-sm hover:shadow-md transition-shadow"
           >
             {deleteClassMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -175,6 +180,13 @@ export const Classes = () => {
           </Button>
         </div>
       )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing <span className="font-medium">{filteredClasses.length}</span> of{" "}
+          <span className="font-medium">{classes.length}</span> classes
+        </p>
+      </div>
     </div>
   );
 };

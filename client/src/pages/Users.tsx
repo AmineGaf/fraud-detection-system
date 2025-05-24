@@ -40,20 +40,13 @@ export const Users = () => {
   const bulkAssignMutation = useBulkAssignClass();
   const updateUserMutation = useUpdateUser();
 
-
   const filteredUsers = users.filter((user: User) => {
-    // Search term filtering
     const matchesSearch =
       user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    // Role filtering
     const matchesRole = !filters.role || user.role.name === filters.role;
-
-    // Class filtering
     const matchesClass = !filters.class ||
       user.classes?.some(c => String(c.id) === filters.class);
-
     return matchesSearch && matchesRole && matchesClass;
   });
 
@@ -75,7 +68,7 @@ export const Users = () => {
         setSelectedUsers([]);
       }
     } catch (error) {
-      // Error is already handled by the hook
+      console.error("Bulk assignment error:", error);
     }
   };
 
@@ -97,7 +90,7 @@ export const Users = () => {
       setIsDialogOpen(false);
       setEditingUserId(null);
     } catch (error) {
-      throw error
+      throw error;
     }
   };
 
@@ -114,36 +107,40 @@ export const Users = () => {
   const isLoading = isUsersLoading || isClassesLoading;
 
   if (isLoading) return (
-    <div className="p-4 flex items-center gap-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Loading users and classes...
+    <div className="p-6 flex items-center justify-center gap-3 h-[300px]">
+      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <span className="text-muted-foreground">Loading users and classes...</span>
     </div>
   );
 
   return (
-    <div className="space-y-6 p-4  ">
+    <div className="space-y-6 p-6 animate-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Manage all system users and their permissions</p>
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            User Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage all system users and their permissions
+          </p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {
             setEditingUserId(null);
-            setTableKey(prev => prev + 1); // Force table remount
+            setTableKey(prev => prev + 1);
           }
         }}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
               <Plus className="h-4 w-4" />
               Add User
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px] rounded-lg">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg font-semibold">
                 {editingUserId ? "Edit User" : "Add New User"}
               </DialogTitle>
             </DialogHeader>
@@ -161,7 +158,6 @@ export const Users = () => {
             />
           </DialogContent>
         </Dialog>
-
       </div>
 
       <SearchBar
@@ -172,21 +168,23 @@ export const Users = () => {
         classes={classes}
       />
 
-      <UserTable
-        key={`user-table-${tableKey}`}
-        users={filteredUsers}
-        classes={classes}
-        selectedUsers={selectedUsers}
-        onSelectUsers={setSelectedUsers}
-        onAssign={handleAssignClass}
-        onRemove={handleRemoveFromClass}
-        onDelete={deleteUserMutation.mutate}
-        onEdit={handleEditUser}
-        isDeleting={deleteUserMutation.isPending}
-        isAssigning={assignClassMutation.isPending}
-        isRemoving={removeFromClassMutation.isPending}
-        isEditing={updateUserMutation.isPending}
-      />
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <UserTable
+          key={`user-table-${tableKey}`}
+          users={filteredUsers}
+          classes={classes}
+          selectedUsers={selectedUsers}
+          onSelectUsers={setSelectedUsers}
+          onAssign={handleAssignClass}
+          onRemove={handleRemoveFromClass}
+          onDelete={deleteUserMutation.mutate}
+          onEdit={handleEditUser}
+          isDeleting={deleteUserMutation.isPending}
+          isAssigning={assignClassMutation.isPending}
+          isRemoving={removeFromClassMutation.isPending}
+          isEditing={updateUserMutation.isPending}
+        />
+      </div>
 
       {selectedUsers.length > 0 && (
         <BulkAssignToolbar
@@ -198,13 +196,19 @@ export const Users = () => {
         />
       )}
 
-      <div className="flex items-center justify-end space-x-2">
-        <Button variant="outline" size="sm" disabled>
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Next
-        </Button>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing <span className="font-medium">{filteredUsers.length}</span> of{" "}
+          <span className="font-medium">{users.length}</span> users
+        </p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" disabled>
+            Previous
+          </Button>
+          <Button variant="outline" size="sm" disabled>
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

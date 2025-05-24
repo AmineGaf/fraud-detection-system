@@ -6,13 +6,13 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Loader2, Eye } from "lucide-react";
@@ -57,6 +57,20 @@ export const ExamTable = ({
         return "outline";
     }
   };
+
+  const getStatusBadgeColor = (status: ExamStatus) => {
+    switch (status) {
+      case ExamState.UPCOMING:
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case ExamState.ONGOING:
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case ExamState.COMPLETED:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
   const handleEdit = (examId: number) => {
     setOpenDropdownId(null);
     onEdit(examId);
@@ -79,105 +93,114 @@ export const ExamTable = ({
   };
 
   return (
-    <div className="rounded-lg border overflow-hidden">
-      <Table>
-        <TableHeader className="bg-muted/50">
-          <TableRow>
-            <TableHead className="w-[40px]">
-              <Checkbox
-                checked={selectedExams.length === exams.length && exams.length > 0}
-                onCheckedChange={handleSelectAll}
-                aria-label="Select all exams"
-              />
-            </TableHead>
-            <TableHead className="w-[200px]">Name</TableHead>
-            <TableHead>Class</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {exams.length > 0 ? (
-            exams.map((exam) => (
-              <TableRow key={exam.id} className="hover:bg-muted/50">
-                <TableCell>
-                  <Checkbox
-                    checked={selectedExams.includes(exam.id)}
-                    onCheckedChange={(checked) => handleSelectExam(!!checked, exam.id)}
-                    aria-label={`Select exam ${exam.name}`}
-                  />
-                </TableCell>
-                <TableCell className="font-medium">
-                  {exam.name}
+    <Table className="border-collapse">
+      <TableHeader className="bg-muted/30">
+        <TableRow className="hover:bg-muted/30">
+          <TableHead className="w-[40px] px-4">
+            <Checkbox
+              checked={selectedExams.length === exams.length && exams.length > 0}
+              onCheckedChange={handleSelectAll}
+              aria-label="Select all exams"
+              className="border-muted-foreground/30"
+            />
+          </TableHead>
+          <TableHead className="w-[200px] px-4">Name</TableHead>
+          <TableHead className="px-4">Class</TableHead>
+          <TableHead className="px-4">Date</TableHead>
+          <TableHead className="px-4">Status</TableHead>
+          <TableHead className="text-right px-4">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {exams.length > 0 ? (
+          exams.map((exam) => (
+            <TableRow key={exam.id} className="hover:bg-muted/10 border-t border-muted/20">
+              <TableCell className="px-4">
+                <Checkbox
+                  checked={selectedExams.includes(exam.id)}
+                  onCheckedChange={(checked) => handleSelectExam(!!checked, exam.id)}
+                  aria-label={`Select exam ${exam.name}`}
+                  className="border-muted-foreground/30"
+                />
+              </TableCell>
+              <TableCell className="font-medium px-4">
+                <div className="flex flex-col">
+                  <span className="font-medium text-foreground">{exam.name}</span>
                   {exam.fraud_status && (
-                    <span className="ml-2 text-xs text-red-500">(Fraud Detected)</span>
+                    <span className="text-xs text-red-500 mt-1">Fraud Detected</span>
                   )}
-                </TableCell>
-                <TableCell>{`Class ${exam.class_info.name}`}</TableCell>
-                <TableCell>
-                  {format(new Date(exam.exam_date), "PPpp")}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusBadgeVariant(exam.status)}>
-                    {exam.status.toLowerCase()}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu
-                    open={openDropdownId === exam.id}
-                    onOpenChange={(open) => setOpenDropdownId(open ? exam.id : null)}
-                  >
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleViewDetails(exam.id)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleEdit(exam.id)}
-                        disabled={isEditing}
-                      >
-                        {isEditing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => {
-                          setOpenDropdownId(null);
-                          onDelete(exam.id);
-                        }}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                No exams found
+                </div>
+              </TableCell>
+              <TableCell className="px-4 text-muted-foreground">
+                {exam.class_info.name}
+              </TableCell>
+              <TableCell className="px-4">
+                {format(new Date(exam.exam_date), "PPpp")}
+              </TableCell>
+              <TableCell className="px-4">
+                <Badge 
+                  variant="outline"
+                  className={getStatusBadgeColor(exam.status)}
+                >
+                  {exam.status.toLowerCase()}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right px-4">
+                <DropdownMenu
+                  open={openDropdownId === exam.id}
+                  onOpenChange={(open) => setOpenDropdownId(open ? exam.id : null)}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 hover:bg-muted/50"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => handleViewDetails(exam.id)}
+                      className="px-3 py-2"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleEdit(exam.id)}
+                      disabled={isEditing}
+                      className="px-3 py-2"
+                    >
+                      {isEditing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuItem
+                      className="text-destructive px-3 py-2 focus:text-destructive"
+                      onClick={() => {
+                        setOpenDropdownId(null);
+                        onDelete(exam.id);
+                      }}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
-          )}
-        </TableBody>
-        {exams.length > 0 && (
-          <TableCaption>
-            Showing {exams.length} exam{exams.length !== 1 ? 's' : ''}
-          </TableCaption>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground py-8">
+              No exams found
+            </TableCell>
+          </TableRow>
         )}
-      </Table>
-    </div>
+      </TableBody>
+    </Table>
   );
 };

@@ -37,34 +37,34 @@
 :root {
   --radius: 0.5rem;
   
-  --background: #ffffff;               /* Pure white background */
-  --foreground: #1a1a1a;               /* Dark grey for text */
-  --card: #ffffff;                     /* White cards */
-  --card-foreground: #1a1a1a;
+  /* Modern color palette */
+  --background: #f8fafc;               /* Soft off-white background */
+  --foreground: #0f172a;               /* Deep navy for text */
+  --card: #ffffff;                     /* Pure white cards */
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #1a1a1a;
-  --primary: #2563eb;                  /* Vibrant blue (600-700 range) */
-  --primary-foreground: #ffffff;       /* White text on primary */
-  --secondary: #f8fafc;                /* Very light grey */
-  --secondary-foreground: #1a1a1a;
-  --muted: #f1f5f9;                    /* Light grey */
-  --muted-foreground: #64748b;         /* Medium grey for secondary text */
-  --accent: #e0e7ff;                   /* Very light blue */
-  --accent-foreground: #2563eb;
-  --destructive: #ef4444;              /* Red for errors */
-  --border: #e2e8f0;                   /* Light grey border */
+  --popover-foreground: #0f172a;
+  --primary: #4f46e5;                  /* Vibrant indigo */
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;                /* Light slate */
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e0e7ff;                   /* Soft indigo */
+  --accent-foreground: #4f46e5;
+  --destructive: #ef4444;
+  --border: #cbd5e1;                   /* Soft slate border */
   --input: #e2e8f0;
-  --ring: #93c5fd;                     /* Light blue for focus rings */
-  --sidebar: #ffffff;                  /* White sidebar */
-  --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #2563eb;
+  --ring: #a5b4fc;                     /* Light indigo for focus rings */
+  --sidebar: #ffffff;                  /* White sidebar with subtle shadow */
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #4f46e5;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #2563eb;
+  --sidebar-accent-foreground: #4f46e5;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #93c5fd;
+  --sidebar-ring: #a5b4fc;
 }
-
 
 @layer base {
   * {
@@ -72,6 +72,47 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Animation classes */
+@layer utilities {
+  .animate-in {
+    animation: animateIn 0.3s ease-out forwards;
+  }
+  
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .shadow-soft {
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .shadow-sidebar {
+    box-shadow: 4px 0 24px -4px rgba(0, 0, 0, 0.05);
+  }
+}

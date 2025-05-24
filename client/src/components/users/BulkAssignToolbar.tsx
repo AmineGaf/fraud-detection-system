@@ -46,7 +46,7 @@ export function BulkAssignToolbar({
   const totalIsAssigning = isAssigning || localIsAssigning;
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-background p-3 shadow-lg rounded-md border flex items-center gap-3 z-50">
+    <div className="fixed left-1/2 transform -translate-x-1/2 bg-background p-3 shadow-lg rounded-md border flex items-center gap-3 z-50">
       <Badge variant="secondary" className="px-2 py-1">
         {selectedUsers.length} selected
       </Badge>

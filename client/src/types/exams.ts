@@ -1,7 +1,7 @@
 export const ExamState = {
-  UPCOMING: "UPCOMING",
-  ONGOING: "ONGOING",
-  COMPLETED: "COMPLETED",
+  UPCOMING: "upcoming",
+  ONGOING: "ongoing",
+  COMPLETED: "completed",
 } as const;
 export type ExamStatus = (typeof ExamState)[keyof typeof ExamState];
 
@@ -42,7 +42,6 @@ export interface AddExam {
   exam_date: string;
   class_id: number;
   status?: ExamStatus;
-  sale?: string; // If needed
 }
 
 export interface UpdateExam {
