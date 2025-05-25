@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, VideoIcon, SquareIcon, ScanEye, VideoOff } from "lucide-react";
 import type { Exam, FraudEvidence } from "@/types/exams";
-//import testImage from "./test.jpg";
+import testImage from "./test.jpg";
 
 interface FraudDetectionSessionProps {
   exam: Exam;
@@ -50,48 +50,91 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
     onSessionEnd();
   };
 
-  // ----------------TESTING WITH LOCAL IMAGE---------------------
+  // -----------------TESTING WITH LOCAL IMAGE---------------------
+  const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const captureAndAnalyzeFrame = async () => {
+    try {
+      const imageDataUrl = await convertImageToBase64(testImage);
+      const base64Only = imageDataUrl.split(',')[1];
+
+      const res = await fetch("http://localhost:8000/api/ai/detect/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_data: base64Only,
+          exam_id: "test123",
+        }),
+      });
+
+      const result = await res.json();
 
 
-   const captureAndAnalyzeFrame = async () => {
-     if (!canvasRef.current || !videoRef.current) return;
 
-     const canvas = canvasRef.current;
-     const video = videoRef.current;
-     canvas.width = video.videoWidth;
-     canvas.height = video.videoHeight;
+      if (result.is_fraud) {
+        const evidence: FraudEvidence = {
+          examId: 2,
+          timestamp: new Date().toISOString(),
+          screenshot: imageDataUrl,
+          detections: result.detections,
+        };
+        onFraudDetected(evidence);
 
-     const ctx = canvas.getContext("2d");
-     if (!ctx) return;
+      }
+    } catch (err) {
+      setError("Failed to convert image or send data to server.");
+    }
+  };
 
-     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-     const imageDataUrl = canvas.toDataURL("image/jpeg");
-     const base64Only = imageDataUrl.split(',')[1];
+  // const captureAndAnalyzeFrame = async () => {
+  //   if (!canvasRef.current || !videoRef.current) return;
 
-     try {
-       const res = await fetch("http://localhost:8000/api/ai/detect/", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({
-           image_data: base64Only,
-           exam_id: exam.id
-         }),
-       });
+  //   const canvas = canvasRef.current;
+  //   const video = videoRef.current;
+  //   canvas.width = video.videoWidth;
+  //   canvas.height = video.videoHeight;
 
-       const result = await res.json();
-       if (result.is_fraud) {
-         const evidence: FraudEvidence = {
-           examId: exam.id,
-           timestamp: new Date().toISOString(),
-           screenshot: imageDataUrl,
-           detections: result.detections,
-         };
-         onFraudDetected(evidence);
-       }
-     } catch (err) {
-       setError("Error sending data to detection service.");
-     }
-   };
+  //   const ctx = canvas.getContext("2d");
+  //   if (!ctx) return;
+
+  //   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  //   const imageDataUrl = canvas.toDataURL("image/jpeg");
+  //   const base64Only = imageDataUrl.split(',')[1];
+
+  //   try {
+  //     const res = await fetch("http://localhost:8000/api/ai/detect/", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         image_data: base64Only,
+  //         exam_id: exam.id
+  //       }),
+  //     });
+
+  //     const result = await res.json();
+  //     if (result.is_fraud) {
+  //       const evidence: FraudEvidence = {
+  //         examId: exam.id,
+  //         timestamp: new Date().toISOString(),
+  //         screenshot: imageDataUrl,
+  //         detections: result.detections,
+  //       };
+  //       onFraudDetected(evidence);
+  //     }
+  //   } catch (err) {
+  //     setError("Error sending data to detection service.");
+  //   }
+  // };
 
   useEffect(() => {
     return () => {

@@ -22,6 +22,7 @@ import { Checkbox } from "../ui/checkbox";
 import { format } from "date-fns";
 import { ExamState } from "@/types/exams";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface ExamTableProps {
   exams: Exam[];
@@ -44,19 +45,8 @@ export const ExamTable = ({
 }: ExamTableProps) => {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const getStatusBadgeVariant = (status: ExamStatus) => {
-    switch (status) {
-      case ExamState.UPCOMING:
-        return "secondary";
-      case ExamState.ONGOING:
-        return "default";
-      case ExamState.COMPLETED:
-        return "outline";
-      default:
-        return "outline";
-    }
-  };
 
   const getStatusBadgeColor = (status: ExamStatus) => {
     switch (status) {
@@ -102,6 +92,7 @@ export const ExamTable = ({
               onCheckedChange={handleSelectAll}
               aria-label="Select all exams"
               className="border-muted-foreground/30"
+              disabled={user?.role_id !== 3}
             />
           </TableHead>
           <TableHead className="w-[200px] px-4">Name</TableHead>
@@ -121,6 +112,7 @@ export const ExamTable = ({
                   onCheckedChange={(checked) => handleSelectExam(!!checked, exam.id)}
                   aria-label={`Select exam ${exam.name}`}
                   className="border-muted-foreground/30"
+                  disabled={user?.role_id !== 3}
                 />
               </TableCell>
               <TableCell className="font-medium px-4">
@@ -138,7 +130,7 @@ export const ExamTable = ({
                 {format(new Date(exam.exam_date), "PPpp")}
               </TableCell>
               <TableCell className="px-4">
-                <Badge 
+                <Badge
                   variant="outline"
                   className={getStatusBadgeColor(exam.status)}
                 >
@@ -151,9 +143,9 @@ export const ExamTable = ({
                   onOpenChange={(open) => setOpenDropdownId(open ? exam.id : null)}
                 >
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 w-8 p-0 hover:bg-muted/50"
                     >
                       <MoreHorizontal className="h-4 w-4" />
@@ -183,7 +175,7 @@ export const ExamTable = ({
                         setOpenDropdownId(null);
                         onDelete(exam.id);
                       }}
-                      disabled={isDeleting}
+                      disabled={isDeleting || user?.role_id !== 3}
                     >
                       {isDeleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                       Delete

@@ -1,5 +1,5 @@
 import { Lock, Mail } from 'lucide-react';
-import {  useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
@@ -13,9 +13,7 @@ type LoginFormData = {
 
 export const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { login } = useAuth();
-  const from = location.state?.from?.pathname || '/';
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
 
@@ -25,7 +23,17 @@ export const Login = () => {
         username: data.email,
         password: data.password
       });
-      navigate(from, { replace: true });
+
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        if (user?.role_id === 3) {
+          navigate('/', { replace: true });
+        } else {
+          navigate('/classes', { replace: true });
+        }
+      }
+
       toast.success('Login successful');
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');

@@ -20,6 +20,7 @@ import type { Class } from "@/types/classes";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "../ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { useAuth } from "@/context/AuthContext";
 
 interface ClassTableProps {
   classes: Class[];
@@ -43,6 +44,7 @@ export const ClassTable = ({
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [viewUsersDialogOpen, setViewUsersDialogOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const { user } = useAuth();
 
   const handleEdit = (classId: number) => {
     setOpenDropdownId(null);
@@ -66,6 +68,7 @@ export const ClassTable = ({
                 onSelectClasses(checked ? classes.map(cls => cls.id) : []);
               }}
               className="border-muted-foreground/30"
+              disabled={user?.role_id !== 3}
             />
           </TableHead>
           <TableHead className="w-[200px] px-4">Name</TableHead>
@@ -90,6 +93,7 @@ export const ClassTable = ({
                     onSelectClasses(newSelection);
                   }}
                   className="border-muted-foreground/30"
+                  disabled={user?.role_id !== 3}
                 />
               </TableCell>
               <TableCell className="font-medium px-4">
@@ -124,9 +128,9 @@ export const ClassTable = ({
                   }}
                 >
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 w-8 p-0 hover:bg-muted/50"
                     >
                       <MoreHorizontal className="h-4 w-4" />
@@ -135,7 +139,7 @@ export const ClassTable = ({
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem
                       onClick={() => handleEdit(cls.id)}
-                      disabled={isEditing}
+                      disabled={isEditing || user?.role_id !== 3}
                       className="px-3 py-2"
                     >
                       {isEditing ? (
@@ -157,7 +161,7 @@ export const ClassTable = ({
                         setOpenDropdownId(null);
                         onDelete(cls.id);
                       }}
-                      disabled={isDeleting}
+                      disabled={isDeleting || user?.role_id !== 3}
                     >
                       {isDeleting ? (
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -177,7 +181,7 @@ export const ClassTable = ({
           </TableRow>
         )}
       </TableBody>
-      
+
       <Dialog open={viewUsersDialogOpen} onOpenChange={setViewUsersDialogOpen}>
         <DialogContent className="max-h-[80vh] overflow-y-auto rounded-lg">
           <DialogHeader>
@@ -198,10 +202,10 @@ export const ClassTable = ({
                   <div className="font-medium">{user.full_name}</div>
                   <div className="text-muted-foreground truncate">{user.email}</div>
                   <div>
-                    <Badge 
+                    <Badge
                       variant="outline"
                       className={
-                        user.is_professor 
+                        user.is_professor
                           ? "bg-indigo-50 text-indigo-700 border-indigo-200"
                           : "bg-purple-50 text-purple-700 border-purple-200"
                       }

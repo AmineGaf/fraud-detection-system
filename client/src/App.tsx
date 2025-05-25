@@ -12,6 +12,7 @@ import { Toaster } from 'sonner';
 import { PasswordResetPage } from './pages/PasswordResetPage';
 import { Classes } from './pages/Classes';
 import { ExamDetailsPage } from './components/exams/ExamDetailsPage';
+import { Dashboard } from './pages/Dashboard';
 
 function AppLayout() {
 
@@ -30,26 +31,18 @@ function AppLayout() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<PasswordResetPage />} />
-              
+
               {/* Regular protected routes */}
               <Route element={<PrivateRoute />}>
                 <Route path="/exams" element={<Exams />} />
                 <Route path='/exams/:examId' element={<ExamDetailsPage />} />
                 <Route path="/classes" element={<Classes />} />
-                <Route path="/" element={
-                  <>
-                    <h2 className="text-2xl font-bold mb-4 text-foreground">Welcome</h2>
-                    <div className="bg-card p-6 rounded-lg shadow border border-border">
-                      <p className="text-foreground">
-                        This is your main content area.
-                      </p>
-                    </div>
-                  </>
-                } />
+
               </Route>
-              
+
               {/* Admin-only protected routes */}
               <Route element={<PrivateRoute requiredRole={3} />}>
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/users" element={<Users />} />
               </Route>
             </Routes>
