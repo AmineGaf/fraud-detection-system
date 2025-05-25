@@ -9,7 +9,7 @@ import {
     SidebarTrigger,
     SidebarSeparator
 } from '../sidebar/sidebar';
-import { Settings, Users, FileText, LogOut, PanelLeft, BookOpen, Eye, LayoutDashboard } from 'lucide-react';
+import {  Users, FileText, LogOut, PanelLeft, BookOpen, Eye, LayoutDashboard } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -24,15 +24,13 @@ export const SidebarComponent = () => {
         navigate('/login');
     };
 
-    // Define base menu items
     const menuItems = [
-        { icon: LayoutDashboard, label: "Dashboard", path: "/" },
         { icon: BookOpen, label: "Classes", path: "/classes" },
         { icon: FileText, label: "Exams", path: "/exams" },
     ];
 
-    // Add Users menu item only for admin (role_id = 3)
     if (user?.role_id === 3) {
+        menuItems.unshift({ icon: LayoutDashboard, label: "Dashboard", path: "/" });
         menuItems.splice(2, 0, { icon: Users, label: "Users", path: "/users" });
     }
 
@@ -81,40 +79,25 @@ export const SidebarComponent = () => {
 
                     <SidebarSeparator className="bg-border my-2" />
 
-                    <SidebarMenuItem>
-                        <div
-                            onClick={handleLogout}
-                            className="w-full cursor-pointer"
-                        >
-                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
-                                <div className="relative flex items-center gap-3 p-2">
-                                    <LogOut className="w-5 h-5 text-sidebar-foreground group-hover:text-red-500 transition-colors" />
-                                    <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-red-500 transition-colors">
-                                        Logout
-                                    </span>
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-red-500 rounded-r-full transition-all duration-300"></div>
-                                </div>
-                            </SidebarMenuButton>
-                        </div>
-                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
 
             <SidebarFooter className="p-4 border-t border-border">
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <Link to="/settings" className="w-full">
-                            <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
-                                <div className="relative flex items-center gap-3 p-2">
-                                    <Settings className="w-5 h-5 text-sidebar-foreground group-hover:text-sidebar-primary transition-colors" />
-                                    <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-sidebar-primary transition-colors">
-                                        Settings
-                                    </span>
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-sidebar-primary rounded-r-full transition-all duration-300"></div>
-                                </div>
-                            </SidebarMenuButton>
-                        </Link>
-                    </SidebarMenuItem>
+                    <div
+                        onClick={handleLogout}
+                        className="w-full cursor-pointer"
+                    >
+                        <SidebarMenuButton className="group-data-[state=collapsed]/sidebar:justify-center hover:bg-accent w-full transition-all duration-200 rounded-lg group">
+                            <div className="relative flex items-center gap-3 p-2">
+                                <LogOut className="w-5 h-5 text-sidebar-foreground group-hover:text-red-500 transition-colors" />
+                                <span className="group-data-[state=collapsed]/sidebar:hidden text-sidebar-foreground group-hover:text-red-500 transition-colors">
+                                    Logout
+                                </span>
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-transparent group-hover:bg-red-500 rounded-r-full transition-all duration-300"></div>
+                            </div>
+                        </SidebarMenuButton>
+                    </div>
                 </SidebarMenu>
             </SidebarFooter>
         </Sidebar>

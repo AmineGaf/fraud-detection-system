@@ -20,6 +20,7 @@ import { ExamsSearchBar } from "@/components/exams/SearchBar";
 import type { Exam, AddExam } from "@/types/exams";
 import { ExamState } from "@/types/exams";
 import { useClassesData } from "@/hooks/useClasses";
+import { useAuth } from "@/context/AuthContext";
 
 export const Exams = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,6 +33,7 @@ export const Exams = () => {
     status?: string;
   }>({});
 
+  const { user } = useAuth();
   const { data: exams = [], isLoading: isExamsLoading } = useExamsData();
   const { data: classes = [], isLoading: isClassesLoading } = useClassesData();
 
@@ -110,12 +112,17 @@ export const Exams = () => {
             }
           }}
         >
-          <DialogTrigger asChild>
-            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
-              <Plus className="h-4 w-4" />
-              Add Exam
-            </Button>
-          </DialogTrigger>
+          {
+            user?.role_id === 3 && (
+              <DialogTrigger asChild>
+                <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
+                  <Plus className="h-4 w-4" />
+                  Add Exam
+                </Button>
+              </DialogTrigger>
+            )
+          }
+
           <DialogContent className="sm:max-w-2xl rounded-lg">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">

@@ -18,6 +18,7 @@ import { AddClassForm } from "@/components/classes/AddClassForm";
 import { ClassTable } from "@/components/classes/ClassTable";
 import { SearchBar } from "@/components/classes/SearchBar";
 import type { Class, AddClass } from "@/types/classes";
+import { useAuth } from "@/context/AuthContext";
 
 export const Classes = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +32,7 @@ export const Classes = () => {
     status?: string;
   }>({});
 
+  const { user } = useAuth();
   const { data: classes = [], isLoading: isClassesLoading } = useClassesData();
   const createClassMutation = useCreateClass();
   const deleteClassMutation = useDeleteClass();
@@ -109,12 +111,17 @@ export const Classes = () => {
             }
           }}
         >
-          <DialogTrigger asChild>
-            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
-              <Plus className="h-4 w-4" />
-              Add Class
-            </Button>
-          </DialogTrigger>
+          {
+            user?.role_id === 3 && (
+              <DialogTrigger asChild>
+                <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
+                  <Plus className="h-4 w-4" />
+                  Add Class
+                </Button>
+              </DialogTrigger>
+            )
+          }
+
           <DialogContent className="sm:max-w-[600px] rounded-lg">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">
