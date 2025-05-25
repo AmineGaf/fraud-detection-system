@@ -8,7 +8,7 @@ from datetime import datetime
 class FraudDetector:
     def __init__(self):
         self.model_path = "app/core/detection/models/best.pt"
-        self.min_confidence = 0.6
+        self.min_confidence = 0.0
         self.model = None
         self.class_names = None
         self._load_model()
@@ -20,7 +20,6 @@ class FraudDetector:
         print(f"Model loaded with classes: {self.class_names}")
 
     def process_image(self, image_data: str) -> Dict[str, Any]:
-        
         if not image_data or not isinstance(image_data, str):
             return {
                 "detections": [],
@@ -28,22 +27,16 @@ class FraudDetector:
                 "timestamp": datetime.now().isoformat(),
                 "error": "Invalid image data"
             }
-        
         try:
-            
             if not image_data.strip():
                 raise ValueError("Empty image data")
-            
             # Add padding if needed (base64 requires length divisible by 4)
             padding = len(image_data) % 4
             if padding:
                 image_data += "=" * (4 - padding)
             # Convert base64 to numpy array
-            
-            
             nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
             frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
             if frame is None:
                 return {
                 "detections": [],
@@ -51,18 +44,14 @@ class FraudDetector:
                 "timestamp": datetime.now().isoformat(),
                 "error": "Could not decode image"
                 }
-            
             # Run detection
             results = self.model(frame)
-            
             detections = []
             is_fraud = False
-            
             for result in results:
                 boxes = result.boxes.xyxy.cpu().numpy()
                 confidences = result.boxes.conf.cpu().numpy()
                 class_ids = result.boxes.cls.cpu().numpy()
-                
                 for box, confidence, class_id in zip(boxes, confidences, class_ids):
                     if confidence > self.min_confidence and self.class_names[int(class_id)] == "cheating":
                         is_fraud = True
@@ -72,13 +61,11 @@ class FraudDetector:
                             "confidence": float(confidence),
                             "bbox": box.tolist()  # Convert numpy array to list
                         })
-            
             return {
                 "detections": detections,
                 "is_fraud": is_fraud,
                 "timestamp": datetime.now().isoformat()
             }
-            
         except Exception as e:
             return {
                 "detections": [],

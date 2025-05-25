@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, VideoIcon, SquareIcon, ScanEye, VideoOff } from "lucide-react";
 import type { Exam, FraudEvidence } from "@/types/exams";
+//import testImage from "./test.jpg";
 
 interface FraudDetectionSessionProps {
   exam: Exam;
@@ -33,7 +34,7 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
       setIsMonitoring(true);
       onSessionStart();
 
-      intervalRef.current = setInterval(captureAndAnalyzeFrame, 5000);
+      intervalRef.current = setInterval(captureAndAnalyzeFrame, 2000);
     } catch (err) {
       setError("Unable to access webcam. Please check permissions.");
     }
@@ -49,45 +50,48 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
     onSessionEnd();
   };
 
-  const captureAndAnalyzeFrame = async () => {
-    if (!canvasRef.current || !videoRef.current) return;
+  // ----------------TESTING WITH LOCAL IMAGE---------------------
 
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+   const captureAndAnalyzeFrame = async () => {
+     if (!canvasRef.current || !videoRef.current) return;
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageDataUrl = canvas.toDataURL("image/jpeg");
-    const base64Only = imageDataUrl.split(',')[1];
+     const canvas = canvasRef.current;
+     const video = videoRef.current;
+     canvas.width = video.videoWidth;
+     canvas.height = video.videoHeight;
 
-    try {
-      const res = await fetch("http://localhost:8000/api/ai/detect/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image_data: base64Only,
-          exam_id: "test123"
-        }),
-      });
+     const ctx = canvas.getContext("2d");
+     if (!ctx) return;
 
-      const result = await res.json();
-      if (result.is_fraud) {
-        const evidence: FraudEvidence = {
-          examId: exam.id,
-          timestamp: new Date().toISOString(),
-          screenshot: imageDataUrl,
-          detections: result.detections,
-        };
-        onFraudDetected(evidence);
-      }
-    } catch (err) {
-      setError("Error sending data to detection service.");
-    }
-  };
+     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+     const imageDataUrl = canvas.toDataURL("image/jpeg");
+     const base64Only = imageDataUrl.split(',')[1];
+
+     try {
+       const res = await fetch("http://localhost:8000/api/ai/detect/", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+           image_data: base64Only,
+           exam_id: exam.id
+         }),
+       });
+
+       const result = await res.json();
+       if (result.is_fraud) {
+         const evidence: FraudEvidence = {
+           examId: exam.id,
+           timestamp: new Date().toISOString(),
+           screenshot: imageDataUrl,
+           detections: result.detections,
+         };
+         onFraudDetected(evidence);
+       }
+     } catch (err) {
+       setError("Error sending data to detection service.");
+     }
+   };
 
   useEffect(() => {
     return () => {
@@ -110,7 +114,7 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
       )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <Button 
+        <Button
           onClick={isMonitoring ? stopSession : startSession}
           className="gap-2 shadow-sm hover:shadow-md transition-shadow"
         >
@@ -126,21 +130,21 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
             </>
           )}
         </Button>
-        
+
         {isMonitoring && (
           <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-md text-sm">
             <ScanEye className="h-4 w-4 animate-pulse" />
-            <span>Analyzing every 5 seconds</span>
+            <span>Analyzing every 2 seconds</span>
           </div>
         )}
       </div>
 
       <div className="relative rounded-xl border bg-muted/20 overflow-hidden">
-        <video 
-          ref={videoRef} 
-          className="w-full aspect-video bg-black" 
-          autoPlay 
-          muted 
+        <video
+          ref={videoRef}
+          className="w-full aspect-video bg-black"
+          autoPlay
+          muted
           playsInline
         />
         {!isMonitoring && (
@@ -155,7 +159,7 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
           </div>
         )}
       </div>
-      
+
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
