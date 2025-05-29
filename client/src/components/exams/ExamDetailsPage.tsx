@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FraudDetectionSession from "./FraudDetectionSession";
 import type { FraudEvidence } from "@/types/exams";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const ExamDetailsPage = () => {
   const { examId } = useParams();
@@ -18,22 +18,42 @@ export const ExamDetailsPage = () => {
   const { mutate: updateExam } = useUpdateExam();
   const navigate = useNavigate();
   const [isMonitoringActive, setIsMonitoringActive] = useState(false);
+  const [fraudEvidence, setFraudEvidence] = useState<FraudEvidence[]>([]);
 
   const exam = exams.find((e) => e.id === Number(examId));
 
-  const handleFraudDetected = (data: FraudEvidence) => {
-    updateExam({
-      examId: Number(examId),
-      examData: {
-        fraud_status: "SUSPECTED",
-        fraud_evidence: [...(exam?.fraud_evidence || []), data]
-      }
-    }, {
-      onSuccess: () => {
-        refetch();
-      }
+  useEffect(() => {
+    if (exam?.fraud_evidence?.length) {
+      setFraudEvidence((prev) => {
+        const existingIds = new Set(prev.map((ev) => ev.id));
+        const merged = [...prev];
+        exam.fraud_evidence?.forEach((ev) => {
+          if (!existingIds.has(ev.id)) merged.push(ev);
+        });
+        return merged;
+      });
+    }
+  }, [exam?.fraud_evidence]);
+
+  const handleFraudDetected = (newEvidence: FraudEvidence) => {
+    setFraudEvidence(prev => {
+      const updatedEvidence = [...prev, newEvidence];
+
+      updateExam({
+        examId: Number(examId),
+        examData: {
+          fraud_status: "SUSPECTED",
+          fraud_evidence: updatedEvidence,
+        },
+      }, {
+        onSuccess: () => refetch()
+      });
+
+      return updatedEvidence;
     });
   };
+
+
 
   const handleSessionStart = () => {
     setIsMonitoringActive(true);
@@ -56,9 +76,11 @@ export const ExamDetailsPage = () => {
   const clearFraud = () => {
     updateExam({
       examId: Number(examId),
-      examData: { fraud_status: null, fraud_evidence: [] }
+      examData: { fraud_status: null },
     }, {
-      onSuccess: () => refetch()
+      onSuccess: () => {
+        refetch();
+      }
     });
   };
 
@@ -67,9 +89,9 @@ export const ExamDetailsPage = () => {
       <div className="flex items-center justify-center h-screen">
         <Alert variant="destructive" className="w-auto max-w-md">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Exam not found</AlertTitle>
+          <AlertTitle>Exam Not Found</AlertTitle>
           <AlertDescription>
-            The requested exam could not be found
+            The exam with ID {examId} could not be located.
           </AlertDescription>
         </Alert>
       </div>
@@ -97,10 +119,10 @@ export const ExamDetailsPage = () => {
               <Badge variant="outline" className="bg-gray-50 border-gray-200">
                 Class {exam.class_info.name}
               </Badge>
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className={
-                  exam.status === "ongoing" 
+                  exam.status === "ongoing"
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                     : exam.status === "upcoming"
                       ? "bg-blue-50 text-blue-700 border-blue-200"
@@ -110,8 +132,8 @@ export const ExamDetailsPage = () => {
                 {exam.status.toLowerCase()}
               </Badge>
               {exam.fraud_status && (
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={
                     exam.fraud_status === "CONFIRMED"
                       ? "bg-red-50 text-red-700 border-red-200"
@@ -132,16 +154,16 @@ export const ExamDetailsPage = () => {
 
           {exam.fraud_status === "SUSPECTED" && (
             <div className="flex gap-2">
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={confirmFraud}
                 className="gap-2 shadow-sm hover:shadow-md transition-shadow"
               >
                 <Check className="h-4 w-4" />
                 Confirm Fraud
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={clearFraud}
                 className="gap-2 shadow-sm hover:shadow-md transition-shadow"
               >
@@ -156,8 +178,8 @@ export const ExamDetailsPage = () => {
           <TabsList className="bg-muted/30">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger 
-              value="evidence" 
+            <TabsTrigger
+              value="evidence"
               disabled={!exam.fraud_evidence?.length}
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm"
             >
@@ -185,7 +207,7 @@ export const ExamDetailsPage = () => {
                   </div>
 
                   {exam.fraud_status && (
-                    <Alert 
+                    <Alert
                       variant={exam.fraud_status === "CONFIRMED" ? "destructive" : "default"}
                       className="border"
                     >

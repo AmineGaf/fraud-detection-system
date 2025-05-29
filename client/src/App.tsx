@@ -34,6 +34,7 @@ function AppLayout() {
 
               {/* Regular protected routes */}
               <Route element={<PrivateRoute />}>
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/exams" element={<Exams />} />
                 <Route path='/exams/:examId' element={<ExamDetailsPage />} />
                 <Route path="/classes" element={<Classes />} />
@@ -42,7 +43,7 @@ function AppLayout() {
 
               {/* Admin-only protected routes */}
               <Route element={<PrivateRoute requiredRole={3} />}>
-                <Route path="/" element={<Dashboard />} />
+
                 <Route path="/users" element={<Users />} />
               </Route>
             </Routes>
