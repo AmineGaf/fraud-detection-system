@@ -25,12 +25,12 @@ export const SidebarComponent = () => {
     };
 
     const menuItems = [
+        { icon: LayoutDashboard, label: "Dashboard", path: "/" },
         { icon: BookOpen, label: "Classes", path: "/classes" },
         { icon: FileText, label: "Exams", path: "/exams" },
     ];
 
     if (user?.role_id === 3) {
-        menuItems.unshift({ icon: LayoutDashboard, label: "Dashboard", path: "/" });
         menuItems.splice(2, 0, { icon: Users, label: "Users", path: "/users" });
     }
 

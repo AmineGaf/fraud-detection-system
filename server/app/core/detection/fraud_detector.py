@@ -8,7 +8,7 @@ from datetime import datetime
 class FraudDetector:
     def __init__(self):
         self.model_path = "app/core/detection/models/best.pt"
-        self.min_confidence = 0.6
+        self.min_confidence = 0.7
         self.model = None
         self.class_names = None
         self._load_model()
@@ -43,6 +43,7 @@ class FraudDetector:
             
             nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
             frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
             if frame is None:
                 return {
@@ -51,6 +52,7 @@ class FraudDetector:
                 "timestamp": datetime.now().isoformat(),
                 "error": "Could not decode image"
                 }
+                
             
             # Run detection
             results = self.model(frame)
