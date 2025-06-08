@@ -30,3 +30,4 @@ async def detect_fraud(data: Dict[str, str]):
             timestamp=datetime.now().isoformat(),
             error=f"Processing error: {str(e)}"
         )
+
