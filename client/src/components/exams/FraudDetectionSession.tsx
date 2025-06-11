@@ -9,6 +9,7 @@ interface FraudDetectionSessionProps {
   onFraudDetected: (evidence: FraudEvidence) => void;
   onSessionStart: () => void;
   onSessionEnd: () => void;
+  isActive: boolean;
 }
 
 const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
@@ -16,16 +17,39 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
   onFraudDetected,
   onSessionStart,
   onSessionEnd,
+  isActive,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Sync internal state with parent's isActive state
+  useEffect(() => {
+    if (isActive && !isMonitoring) {
+      startSession();
+    } else if (!isActive && isMonitoring) {
+      stopSession();
+    }
+  }, [isActive]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const startSession = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
@@ -33,18 +57,25 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
       setIsMonitoring(true);
       onSessionStart();
 
-      intervalRef.current = setInterval(captureAndAnalyzeFrame, 500);
+      // Use a shorter interval for more real-time detection
+      intervalRef.current = setInterval(captureAndAnalyzeFrame, 1000);
     } catch (err) {
       setError("Unable to access webcam. Please check permissions.");
     }
   };
 
   const stopSession = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setIsMonitoring(false);
     onSessionEnd();
   };
@@ -89,18 +120,6 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
     }
   };
 
-
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
-      }
-    };
-  }, []);
-
   return (
     <div className="space-y-6">
       {error && (
@@ -132,7 +151,7 @@ const FraudDetectionSession: React.FC<FraudDetectionSessionProps> = ({
         {isMonitoring && (
           <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-md text-sm">
             <ScanEye className="h-4 w-4 animate-pulse" />
-            <span>Analyzing every 1 seconds</span>
+            <span>Analyzing in real-time</span>
           </div>
         )}
       </div>
