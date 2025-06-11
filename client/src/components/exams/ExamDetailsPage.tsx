@@ -272,6 +272,7 @@ export const ExamDetailsPage = () => {
                   onFraudDetected={handleFraudDetected}
                   onSessionStart={handleSessionStart}
                   onSessionEnd={handleSessionEnd}
+                  isActive={isMonitoringActive}
                 />
               </CardContent>
             </Card>
