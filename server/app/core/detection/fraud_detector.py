@@ -8,7 +8,7 @@ from datetime import datetime
 class FraudDetector:
     def __init__(self):
         self.model_path = "app/core/detection/models/best.pt"
-        self.min_confidence = 0.7
+        self.min_confidence = 0.5
         self.model = None
         self.class_names = None
         self._load_model()
